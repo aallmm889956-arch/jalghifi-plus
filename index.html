@@ -379,19 +379,31 @@ async function getProducts(){
     .order('created_at',{ascending:false});
 
   if(r.error){
-
     $('grid').innerHTML =
     '<div class="empty">تعذر تحميل المنتجات: '+esc(r.error.message)+'</div>';
-
     return;
   }
 
   products = r.data || [];
 
+  const reviewsResult = await db
+    .from('reviews')
+    .select('product_id,reviewer_name,rating,comment,created_at')
+    .order('created_at',{ascending:false});
+
+  const allReviews = reviewsResult.error
+    ? []
+    : (reviewsResult.data || []);
+
+  products = products.map(p => ({
+    ...p,
+    reviews: allReviews.filter(x => x.product_id === p.id)
+  }));
+
   render();
 }
 
-function render(){
+{function render()
 
   $('grid').innerHTML = products.length
   ? products.map(p=>`
@@ -413,6 +425,22 @@ function render(){
           ${p.is_unlimited ? 'متوفر' : 'المخزون ' + (p.stock || 0)}
         </span>
       </div>
+<div class="reviews">
+  <h4>تقييمات المشترين</h4>
+
+  ${
+    (p.reviews || []).length
+    ? p.reviews.map(r => `
+      <div class="card">
+        <b>${esc(r.reviewer_name || 'مشتري')}</b>
+        <span style="color:green"> ✓ تم الشراء</span>
+        <p>${'⭐'.repeat(Number(r.rating) || 0)}</p>
+        <p>${esc(r.comment || '')}</p>
+      </div>
+    `).join('')
+    : '<p class="muted">لا توجد تقييمات بعد.</p>'
+  }
+</div>
 
       <button style="width:100%;margin-top:12px"
         onclick="add('${p.id}')">
@@ -600,9 +628,9 @@ async function reset(){
     return say('اكتب بريدك الإلكتروني أولاً');
   }
 
-  const r = await db.auth.resetPasswordForEmail(email,{
-    redirectTo:location.origin + location.pathname
-  });
+  const r = await db.auth.resetPasswordForEmail(email, {
+  redirectTo: 'https://aallmm889956-arch.github.io/jalghifi-plus/'
+});
 
   if(r.error){
     return say(r.error.message);
@@ -613,7 +641,7 @@ async function reset(){
   say('تم إرسال رابط الاستعادة إلى بريدك.');
 }
 
-function recoveryView(){
+(){function recoveryView
 
   modal('تعيين كلمة مرور جديدة',`
 
@@ -650,14 +678,14 @@ async function saveNewPassword(){
   }
 
   const r = await db.auth.updateUser({
-    password:password
+    password: password
   });
 
   if(r.error){
     return say(r.error.message);
   }
 
-  close();
+  closeModal();
 
   say('تم تغيير كلمة المرور بنجاح.');
 
@@ -765,7 +793,20 @@ async function ordersView(){
     return say(r.error.message);
   }
 
-  modal('طلباتي',(r.data || []).map(o=>`
+  const orders = r.data || [];
+
+  const reviewsResult = await db
+    .from('reviews')
+    .select('order_id')
+    .eq('user_id',user.id);
+
+  if(reviewsResult.error){
+    return say(reviewsResult.error.message);
+  }
+
+  const reviewed = (reviewsResult.data || []).map(x=>x.order_id);
+
+  modal('طلباتي',orders.map(o=>`
 
     <div class="card">
 
@@ -780,11 +821,19 @@ async function ordersView(){
 
       ${
         o.payment_status === 'paid'
-        ? (
-          o.account_sent_at
-          ? '<div class="notice">تم إرسال بيانات الحساب إليك. تحقق من وسيلة التواصل معك.</div>'
-          : '<div class="notice">تم قبول الدفع. سيتم التواصل معك لإرسال بيانات الحساب.</div>'
-        )
+        ? `
+          <div class="notice">
+            ${o.account_sent_at
+              ? 'تم إرسال بيانات الحساب إليك.'
+              : 'تم قبول الدفع. سيتم التواصل معك لإرسال بيانات الحساب.'}
+          </div>
+
+          ${
+            reviewed.includes(o.id)
+            ? '<div class="notice">✓ تم تقييم عملية الشراء</div>'
+            : `<button onclick="reviewForm('${o.id}','${o.product_id}')">⭐ قيّم مشتراك</button>`
+          }
+        `
         : o.payment_status === 'under_review'
         ? '<div class="notice">وصل إيصالك وهو قيد المراجعة.</div>'
         : o.payment_status === 'rejected'
@@ -806,6 +855,59 @@ async function ordersView(){
     </div>
 
   `).join('') || '<p class="empty">لا توجد طلبات</p>');
+}
+
+function reviewForm(orderId,productId){
+
+  modal('تقييم مشتراك',`
+
+    <div class="field">
+      <label>التقييم بالنجوم</label>
+      <select id="reviewRating">
+        <option value="5">⭐⭐⭐⭐⭐ ممتاز</option>
+        <option value="4">⭐⭐⭐⭐ جيد جدًا</option>
+        <option value="3">⭐⭐⭐ جيد</option>
+        <option value="2">⭐⭐ سيئ</option>
+        <option value="1">⭐ سيئ جدًا</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>اكتب رأيك</label>
+      <textarea id="reviewComment" rows="4"></textarea>
+    </div>
+
+    <button onclick="saveReview('${orderId}','${productId}')">
+      إرسال التقييم
+    </button>
+
+  `);
+}
+
+async function saveReview(orderId,productId){
+
+  if(!user) return authView();
+
+  const rating = Number($('reviewRating').value);
+  const comment = $('reviewComment').value.trim();
+
+  const r = await db
+    .from('reviews')
+    .insert({
+      user_id:user.id,
+      product_id:productId,
+      order_id:orderId,
+      rating:rating,
+      comment:comment
+    });
+
+  if(r.error){
+    return say(r.error.message);
+  }
+
+  closeModal();
+  say('تم إرسال تقييمك بنجاح');
+  await ordersView();
 }
 
 /* رفع إيصال التحويل */
