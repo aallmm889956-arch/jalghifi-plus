@@ -5,1459 +5,939 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>جلغيفي بلس</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <style>
-:root{
-  --bg:#09090f;
-  --p:#171725;
-  --line:#303044;
-  --purple:#a855f7;
-  --muted:#aaa6bb;
-}
+:root{--bg:#09090f;--p:#171725;--line:#303044;--purple:#a855f7;--muted:#aaa6bb}
 *{box-sizing:border-box}
-body{
-  margin:0;
-  background:var(--bg);
-  color:#fff;
-  font-family:Tahoma,Arial;
-  padding:18px;
-}
+body{margin:0;background:var(--bg);color:#fff;font-family:Tahoma,Arial;padding:18px}
 .wrap{max-width:1100px;margin:auto}
-.top,.row{
-  display:flex;
-  gap:10px;
-  align-items:center;
-  justify-content:space-between;
-  flex-wrap:wrap;
-}
+.top,.row{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
 .brand{font-size:26px;font-weight:bold}
 .brand b{color:#c084fc}
-button{
-  border:0;
-  border-radius:10px;
-  background:var(--purple);
-  color:white;
-  padding:11px 15px;
-  cursor:pointer;
-  font-weight:bold;
-}
+button{border:0;border-radius:10px;background:var(--purple);color:white;padding:11px 15px;cursor:pointer;font-weight:bold}
 .secondary{background:#333247}
 .success{background:#23865b}
 .danger{background:#a83250}
-.hero,.box,.card{
-  background:var(--p);
-  border:1px solid var(--line);
-  border-radius:17px;
-  padding:18px;
-  margin:16px 0;
-}
-.hero{
-  padding:35px;
-  background:linear-gradient(120deg,#2a1740,#171725);
-}
+.hero,.box,.card{background:var(--p);border:1px solid var(--line);border-radius:17px;padding:18px;margin:16px 0}
+.hero{padding:35px;background:linear-gradient(120deg,#2a1740,#171725)}
 .muted{color:var(--muted)}
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
-  gap:14px;
-}
-.product img{
-  width:100%;
-  height:160px;
-  object-fit:cover;
-  border-radius:10px;
-}
-.price{
-  color:#d8b4fe;
-  font-size:20px;
-  font-weight:bold;
-}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.product img{width:100%;height:160px;object-fit:cover;border-radius:10px}
+.price{color:#d8b4fe;font-size:20px;font-weight:bold}
 .field{margin:12px 0}
-.field label{
-  display:block;
-  margin-bottom:6px;
-}
-.field input,.field textarea{
-  width:100%;
-  padding:11px;
-  border:1px solid #444258;
-  background:#0d0d16;
-  color:white;
-  border-radius:9px;
-}
+.field label{display:block;margin-bottom:6px}
+.field input,.field textarea,.field select{width:100%;padding:11px;border:1px solid #444258;background:#0d0d16;color:white;border-radius:9px}
 .field textarea{min-height:80px}
-.modal{
-  position:fixed;
-  inset:0;
-  background:#000b;
-  display:grid;
-  place-items:center;
-  padding:15px;
-  z-index:10;
-}
-.modal>div{
-  background:var(--p);
-  padding:20px;
-  border-radius:16px;
-  width:min(700px,100%);
-  max-height:90vh;
-  overflow:auto;
-}
+.modal{position:fixed;inset:0;background:#000b;display:grid;place-items:center;padding:15px;z-index:10}
+.modal>div{background:var(--p);padding:20px;border-radius:16px;width:min(760px,100%);max-height:90vh;overflow:auto}
 .hidden{display:none!important}
-.notice{
-  padding:12px;
-  background:#29213a;
-  border-radius:10px;
-  margin:12px 0;
-}
-.empty{
-  text-align:center;
-  padding:30px;
-  color:var(--muted);
-}
-table{
-  width:100%;
-  border-collapse:collapse;
-}
-td,th{
-  text-align:right;
-  padding:9px;
-  border-bottom:1px solid var(--line);
-  vertical-align:top;
-}
+.notice{padding:12px;background:#29213a;border-radius:10px;margin:12px 0}
+.empty{text-align:center;padding:30px;color:var(--muted)}
+table{width:100%;border-collapse:collapse}
+td,th{text-align:right;padding:9px;border-bottom:1px solid var(--line);vertical-align:top}
 .scroll{overflow:auto}
 .small{font-size:13px;line-height:1.8}
 .actions{display:flex;gap:6px;flex-wrap:wrap}
+.summary{background:#10101a;border:1px solid var(--line);padding:12px;border-radius:12px;margin:12px 0}
 </style>
 </head>
-
 <body>
 
 <div class="wrap">
-
 <header class="top">
-  <div class="brand">جلغيفي <b>بلس</b></div>
-
-  <div class="row">
-    <button class="secondary"
-      onclick="$('products').scrollIntoView()">
-      المنتجات
-    </button>
-
-    <button class="secondary" onclick="cartView()">
-      السلة (<span id="count">0</span>)
-    </button>
-
-    <button id="loginBtn" onclick="authView()">
-      تسجيل الدخول
-    </button>
-
-    <button id="ordersBtn" class="secondary hidden" onclick="ordersView()">
-      طلباتي
-    </button>
-
-    <button id="staffBtn" class="secondary hidden" onclick="staffView()">
-      لوحة الإدارة
-    </button>
-
-    <button id="logoutBtn" class="secondary hidden" onclick="logout()">
-      خروج
-    </button>
-  </div>
+<div class="brand">جلغيفي <b>بلس</b></div>
+<div class="row">
+<button class="secondary" onclick="$('products').scrollIntoView()">المنتجات</button>
+<button class="secondary" onclick="cartView()">السلة (<span id="count">0</span>)</button>
+<button id="loginBtn" onclick="authView()">تسجيل الدخول</button>
+<button id="ordersBtn" class="secondary hidden" onclick="ordersView()">طلباتي</button>
+<button id="staffBtn" class="secondary hidden" onclick="staffView()">لوحة الإدارة</button>
+<button id="logoutBtn" class="secondary hidden" onclick="logout()">خروج</button>
+</div>
 </header>
 
 <section class="hero">
-  <h1>منتجات رقمية… توصلك بسهولة</h1>
-  <p class="muted">تسوّق حساباتك الرقمية وتابع طلباتك من حسابك.</p>
-  <button onclick="$('products').scrollIntoView()">
-    تصفح المنتجات
-  </button>
+<h1>منتجات رقمية… توصلك بسهولة</h1>
+<p class="muted">تسوّق منتجاتك الرقمية وتابع طلباتك من حسابك.</p>
+<button onclick="$('products').scrollIntoView()">تصفح المنتجات</button>
 </section>
 
 <div id="message" class="notice hidden"></div>
 
 <section id="products">
-  <h2>المنتجات</h2>
-  <div id="grid" class="grid">
-    <div class="empty">جاري التحميل…</div>
-  </div>
+<h2>المنتجات</h2>
+<div id="grid" class="grid"><div class="empty">جاري التحميل…</div></div>
 </section>
 
 <footer class="muted" style="text-align:center;padding:35px">
-  © <span id="year"></span> جلغيفي بلس — جميع الحقوق محفوظة
+© <span id="year"></span> جلغيفي بلس — جميع الحقوق محفوظة
 </footer>
-
 </div>
 
-<div id="modal" class="modal hidden"
-     onclick="if(event.target===this)closeModal()">
-  <div>
-    <div class="row">
-      <h2 id="title">نافذة</h2>
-      <button class="secondary" onclick="closeModal()">إغلاق</button>
-    </div>
-    <div id="body"></div>
-  </div>
+<div id="modal" class="modal hidden" onclick="if(event.target===this)closeModal()">
+<div>
+<div class="row">
+<h2 id="title">نافذة</h2>
+<button class="secondary" onclick="closeModal()">إغلاق</button>
+</div>
+<div id="body"></div>
+</div>
 </div>
 
 <script>
+const SUPABASE_URL="https://cfdrwjvjjclaqnbvmvuf.supabase.co";
+const KEY="sb_publishable_-8VbAf8C92ialpPZ02UJPQ__hrxOybz";
+const db=window.supabase.createClient(SUPABASE_URL,KEY);
 
-/* إعداد Supabase */
+let user=null,profile=null,products=[],cart=[],settings={},appliedCoupon=null,couponQuote=null;
 
-const SUPABASE_URL =
-"https://cfdrwjvjjclaqnbvmvuf.supabase.co";
+const $=id=>document.getElementById(id);
 
-const KEY =
-"sb_publishable_-8VbAf8C92ialpPZ02UJPQ__hrxOybz";
-
-const db = window.supabase.createClient(
-  SUPABASE_URL,
-  KEY
-);
-
-let user = null;
-let profile = null;
-let products = [];
-let cart = [];
-let settings = {};
-
-const $ = id => document.getElementById(id);
-
-const esc = x => String(x ?? '').replace(/[&<>"']/g,c=>({
-  '&':'&amp;',
-  '<':'&lt;',
-  '>':'&gt;',
-  '"':'&quot;',
-  "'":'&#39;'
+const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({
+'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
 }[c]));
 
 function say(t){
-  $('message').textContent = t;
-  $('message').classList.remove('hidden');
+$('message').textContent=t;
+$('message').classList.remove('hidden');
 }
 
 function modal(t,h){
-  $('title').textContent = t;
-  $('body').innerHTML = h;
-  $('modal').classList.remove('hidden');
+$('title').textContent=t;
+$('body').innerHTML=h;
+$('modal').classList.remove('hidden');
+document.body.style.overflow='hidden';
 }
 
 function closeModal(){
-  $('modal').classList.add('hidden');
-  document.body.style.overflow = '';
+$('modal').classList.add('hidden');
+document.body.style.overflow='';
 }
 
 function cash(x){
-  return Number(x || 0).toFixed(2) + ' ريال';
+return Number(x||0).toFixed(2)+' ريال';
 }
 
 function isStaff(){
-  return ['admin','employee'].includes(profile?.role);
+return ['admin','employee'].includes(profile?.role);
 }
 
 function paymentLabel(o){
-  const s = o.payment_status || o.status;
-
-  return ({
-    pending:'بانتظار الدفع',
-    under_review:'الإيصال قيد المراجعة',
-    paid:'تم قبول الدفع',
-    rejected:'تم رفض الإيصال'
-  })[s] || s || 'غير محدد';
+const s=o.payment_status||o.status;
+return ({
+pending:'بانتظار الدفع',
+under_review:'الإيصال قيد المراجعة',
+paid:'تم قبول الدفع',
+rejected:'تم رفض الإيصال'
+})[s]||s||'غير محدد';
 }
-
-/* تشغيل المتجر */
 
 async function init(){
+$('year').textContent=new Date().getFullYear();
 
-  $('year').textContent = new Date().getFullYear();
+db.auth.onAuthStateChange((event,session)=>{
+user=session?.user||null;
 
-  db.auth.onAuthStateChange((event,session)=>{
-
-    user = session?.user || null;
-
-    if(user){
-
-      setTimeout(async()=>{
-
-        try{
-          await getProfile();
-          nav();
-
-          if(event === 'PASSWORD_RECOVERY'){
-            recoveryView();
-          }
-
-        }catch(e){
-          say(e.message);
-        }
-
-      },0);
-
-    }else{
-
-      profile = null;
-      nav();
-
-    }
-
-  });
-
-  const {data:{session},error} =
-    await db.auth.getSession();
-
-  if(error) throw error;
-
-  user = session?.user || null;
-
-  if(user){
-    await getProfile();
-  }
-
-  await getSettings();
-  await getProducts();
-
-  nav();
-
-  if(location.hash.includes('type=recovery')){
-    recoveryView();
-  }
+if(user){
+setTimeout(async()=>{
+try{
+await getProfile();
+nav();
+if(event==='PASSWORD_RECOVERY')recoveryView();
+}catch(e){say(e.message);}
+},0);
+}else{
+profile=null;
+nav();
 }
+});
 
-/* بيانات الحساب */
+const {data:{session},error}=await db.auth.getSession();
+if(error)throw error;
+
+user=session?.user||null;
+if(user)await getProfile();
+
+await getSettings();
+await getProducts();
+nav();
+
+if(location.hash.includes('type=recovery'))recoveryView();
+}
 
 async function getProfile(){
-
-  const r = await db
-    .from('profiles')
-    .select('*')
-    .eq('id',user.id)
-    .maybeSingle();
-
-  if(r.error) throw r.error;
-
-  profile = r.data || null;
+const r=await db.from('profiles').select('*').eq('id',user.id).maybeSingle();
+if(r.error)throw r.error;
+profile=r.data||null;
 }
-
-/* أزرار القائمة */
 
 function nav(){
-
-  $('loginBtn').classList.toggle('hidden',!!user);
-
-  $('logoutBtn').classList.toggle('hidden',!user);
-
-  $('ordersBtn').classList.toggle('hidden',!user);
-
-  $('staffBtn').classList.toggle('hidden',!isStaff());
-
+$('loginBtn').classList.toggle('hidden',!!user);
+$('logoutBtn').classList.toggle('hidden',!user);
+$('ordersBtn').classList.toggle('hidden',!user);
+$('staffBtn').classList.toggle('hidden',!isStaff());
 }
-
-/* إعدادات المتجر */
 
 async function getSettings(){
-
-  const r = await db
-    .from('store_settings')
-    .select('*');
-
-  settings = {};
-
-  (r.data || []).forEach(x=>{
-    settings[x.key] = x.value;
-  });
+const r=await db.from('store_settings').select('*');
+settings={};
+(r.data||[]).forEach(x=>settings[x.key]=x.value);
 }
-
-/* المنتجات */
 
 async function getProducts(){
+const r=await db.from('products').select('*').eq('is_active',true).order('created_at',{ascending:false});
 
-  const r = await db
-    .from('products')
-    .select('*')
-    .eq('is_active',true)
-    .order('created_at',{ascending:false});
-
-  if(r.error){
-    $('grid').innerHTML =
-    '<div class="empty">تعذر تحميل المنتجات: '+esc(r.error.message)+'</div>';
-    return;
-  }
-
-  products = r.data || [];
-
-  const reviewsResult = await db
-    .from('reviews')
-    .select('product_id,reviewer_name,rating,comment,created_at')
-    .order('created_at',{ascending:false});
-
-  const allReviews = reviewsResult.error
-    ? []
-    : (reviewsResult.data || []);
-
-  products = products.map(p => ({
-    ...p,
-    reviews: allReviews.filter(x => x.product_id === p.id)
-  }));
-
-  render();
+if(r.error){
+$('grid').innerHTML='<div class="empty">تعذر تحميل المنتجات: '+esc(r.error.message)+'</div>';
+return;
 }
 
-{function render()
+products=r.data||[];
 
-  $('grid').innerHTML = products.length
-  ? products.map(p=>`
+const rr=await db.from('reviews').select('product_id,reviewer_name,rating,comment,created_at').order('created_at',{ascending:false});
+const reviews=rr.error?[]:(rr.data||[]);
 
-    <article class="card product">
+products=products.map(p=>({
+...p,
+reviews:reviews.filter(x=>x.product_id===p.id)
+}));
 
-      <img
-        src="${esc(p.image_url || 'https://placehold.co/600x400?text=Digital+Account')}"
-        onerror="this.src='https://placehold.co/600x400?text=Account'">
+render();
+}
 
-      <h3>${esc(p.name)}</h3>
-
-      <p class="muted">${esc(p.description || '')}</p>
-
-      <div class="row">
-        <b class="price">${cash(p.price)}</b>
-
-        <span class="muted">
-          ${p.is_unlimited ? 'متوفر' : 'المخزون ' + (p.stock || 0)}
-        </span>
-      </div>
-<div class="reviews">
-  <h4>تقييمات المشترين</h4>
-
-  ${
-    (p.reviews || []).length
-    ? p.reviews.map(r => `
-      <div class="card">
-        <b>${esc(r.reviewer_name || 'مشتري')}</b>
-        <span style="color:green"> ✓ تم الشراء</span>
-        <p>${'⭐'.repeat(Number(r.rating) || 0)}</p>
-        <p>${esc(r.comment || '')}</p>
-      </div>
-    `).join('')
-    : '<p class="muted">لا توجد تقييمات بعد.</p>'
-  }
+function render(){
+$('grid').innerHTML=products.length?products.map(p=>`
+<article class="card product">
+<img src="${esc(p.image_url||'https://placehold.co/600x400?text=Digital+Account')}" onerror="this.src='https://placehold.co/600x400?text=Account'">
+<h3>${esc(p.name)}</h3>
+<p class="muted">${esc(p.description||'')}</p>
+<div class="row">
+<b class="price">${cash(p.price)}</b>
+<span class="muted">${p.is_unlimited?'متوفر':'المخزون '+(p.stock||0)}</span>
 </div>
-
-      <button style="width:100%;margin-top:12px"
-        onclick="add('${p.id}')">
-        أضف للسلة
-      </button>
-
-    </article>
-
-  `).join('')
-  : '<div class="empty">لا توجد منتجات حاليًا.</div>';
-
+<div>
+<h4>تقييمات المشترين</h4>
+${(p.reviews||[]).length?p.reviews.map(r=>`
+<div class="card">
+<b>${esc(r.reviewer_name||'مشتري')}</b>
+<span style="color:green">✓ تم الشراء</span>
+<p>${'⭐'.repeat(Number(r.rating)||0)}</p>
+<p>${esc(r.comment||'')}</p>
+</div>`).join(''):'<p class="muted">لا توجد تقييمات بعد.</p>'}
+</div>
+<button style="width:100%;margin-top:12px" onclick="add('${p.id}')">أضف للسلة</button>
+</article>
+`).join(''):'<div class="empty">لا توجد منتجات حاليًا.</div>';
 }
-
-/* السلة */
 
 function add(id){
+const p=products.find(x=>x.id===id);
+if(!p)return;
+if(!p.is_unlimited&&Number(p.stock)<=0)return say('نفد المخزون');
 
-  const p = products.find(x=>x.id===id);
+const item=cart.find(x=>x.id===id);
+if(item)item.qty++;
+else cart.push({id,qty:1});
 
-  if(!p) return;
+$('count').textContent=cart.reduce((a,x)=>a+x.qty,0);
+say('تمت إضافة المنتج للسلة');
+}
 
-  if(!p.is_unlimited && Number(p.stock)<=0){
-    return say('نفد المخزون');
-  }
-
-  const item = cart.find(x=>x.id===id);
-
-  if(item){
-    item.qty++;
-  }else{
-    cart.push({id,qty:1});
-  }
-
-  $('count').textContent =
-    cart.reduce((a,x)=>a+x.qty,0);
-
-  say('تمت إضافة المنتج للسلة');
+function cartSubtotal(){
+return cart.reduce((sum,x)=>{
+const p=products.find(z=>z.id===x.id);
+return sum+(p?Number(p.price)*x.qty:0);
+},0);
 }
 
 function cartView(){
+if(!cart.length)return modal('السلة','<p class="empty">السلة فارغة</p>');
 
-  if(!cart.length){
-    return modal('السلة','<p class="empty">السلة فارغة</p>');
-  }
+let total=0;
 
-  let total = 0;
+const h=cart.map(x=>{
+const p=products.find(p=>p.id===x.id);
+if(!p)return '';
+total+=Number(p.price)*x.qty;
+return `<p>${esc(p.name)} × ${x.qty} — ${cash(p.price*x.qty)}</p>`;
+}).join('');
 
-  const h = cart.map(x=>{
-
-    const p = products.find(p=>p.id===x.id);
-
-    if(!p) return '';
-
-    total += Number(p.price) * x.qty;
-
-    return `
-      <p>
-        ${esc(p.name)} × ${x.qty}
-        — ${cash(p.price*x.qty)}
-      </p>
-    `;
-
-  }).join('');
-
-  modal('السلة',
-    h +
-    `<hr><b>الإجمالي: ${cash(total)}</b>
-    <p><button onclick="checkout()">إتمام الطلب</button></p>`
-  );
+modal('السلة',h+`<hr><b>الإجمالي: ${cash(total)}</b><p><button onclick="checkout()">إتمام الطلب</button></p>`);
 }
 
-/* تسجيل الدخول */
-
 function authView(){
-
-  modal('تسجيل الدخول',`
-    <div class="row">
-      <button onclick="authForm('in')">دخول</button>
-      <button class="secondary" onclick="authForm('up')">حساب جديد</button>
-      <button class="secondary" onclick="authForm('reset')">نسيت كلمة المرور</button>
-    </div>
-
-    <div id="form"></div>
-  `);
-
-  authForm('in');
+modal('تسجيل الدخول',`
+<div class="row">
+<button onclick="authForm('in')">دخول</button>
+<button class="secondary" onclick="authForm('up')">حساب جديد</button>
+<button class="secondary" onclick="authForm('reset')">نسيت كلمة المرور</button>
+</div>
+<div id="form"></div>
+`);
+authForm('in');
 }
 
 function authForm(m){
-
-  $('form').innerHTML =
-
-  (m==='up' ? `
-    <div class="field">
-      <label>الاسم</label>
-      <input id="name">
-    </div>
-
-    <div class="field">
-      <label>الجوال</label>
-      <input id="phone">
-    </div>
-  ` : '') +
-
-  `
-    <div class="field">
-      <label>البريد الإلكتروني</label>
-      <input id="email" type="email">
-    </div>
-
-    ${m==='reset' ? '' : `
-      <div class="field">
-        <label>كلمة المرور</label>
-        <input id="pass" type="password">
-      </div>
-    `}
-
-    <button onclick="${
-      m==='in' ? 'login()' :
-      m==='up' ? 'signup()' :
-      'reset()'
-    }">
-      ${
-        m==='in' ? 'دخول' :
-        m==='up' ? 'إنشاء حساب' :
-        'إرسال رابط الاستعادة'
-      }
-    </button>
-  `;
+$('form').innerHTML=
+(m==='up'?`
+<div class="field"><label>الاسم</label><input id="name"></div>
+<div class="field"><label>الجوال</label><input id="phone"></div>
+`:'')+
+`
+<div class="field"><label>البريد الإلكتروني</label><input id="email" type="email"></div>
+${m==='reset'?'':`
+<div class="field"><label>كلمة المرور</label><input id="pass" type="password"></div>
+`}
+<button onclick="${m==='in'?'login()':m==='up'?'signup()':'reset()'}">
+${m==='in'?'دخول':m==='up'?'إنشاء حساب':'إرسال رابط الاستعادة'}
+</button>
+`;
 }
 
 async function login(){
+const r=await db.auth.signInWithPassword({
+email:$('email').value.trim(),
+password:$('pass').value
+});
 
-  const r = await db.auth.signInWithPassword({
-    email:$('email').value.trim(),
-    password:$('pass').value
-  });
+if(r.error)return say(r.error.message);
 
-  if(r.error) return say(r.error.message);
-
-  user = r.data.user;
-
-  await getProfile();
-
-  close();
-  nav();
-
-  say('تم تسجيل الدخول');
+user=r.data.user;
+await getProfile();
+closeModal();
+nav();
+say('تم تسجيل الدخول');
 }
 
 async function signup(){
-
-  const r = await db.auth.signUp({
-
-    email:$('email').value.trim(),
-
-    password:$('pass').value,
-
-    options:{
-      data:{
-        full_name:$('name').value,
-        phone:$('phone').value
-      },
-
-      emailRedirectTo:
-        location.origin + location.pathname
-    }
-
-  });
-
-  if(r.error) return say(r.error.message);
-
-  close();
-
-  say('تم إنشاء الحساب. افحص بريدك لتأكيده.');
+const r=await db.auth.signUp({
+email:$('email').value.trim(),
+password:$('pass').value,
+options:{
+data:{
+full_name:$('name').value,
+phone:$('phone').value
+},
+emailRedirectTo:location.origin+location.pathname
 }
-
-/* استعادة كلمة المرور */
-
-async function reset(){
-
-  const email = $('email').value.trim();
-
-  if(!email){
-    return say('اكتب بريدك الإلكتروني أولاً');
-  }
-
-  const r = await db.auth.resetPasswordForEmail(email, {
-  redirectTo: 'https://aallmm889956-arch.github.io/jalghifi-plus/'
 });
 
-  if(r.error){
-    return say(r.error.message);
-  }
+if(r.error)return say(r.error.message);
 
-  close();
-
-  say('تم إرسال رابط الاستعادة إلى بريدك.');
+closeModal();
+say('تم إنشاء الحساب. افحص بريدك لتأكيده.');
 }
 
-(){function recoveryView
+async function reset(){
+const email=$('email').value.trim();
 
-  modal('تعيين كلمة مرور جديدة',`
+if(!email)return say('اكتب بريدك الإلكتروني أولاً');
 
-    <p class="muted">أدخل كلمة المرور الجديدة لحسابك.</p>
+const r=await db.auth.resetPasswordForEmail(email,{
+redirectTo:'https://aallmm889956-arch.github.io/jalghifi-plus/'
+});
 
-    <div class="field">
-      <label>كلمة المرور الجديدة</label>
-      <input id="newPassword" type="password" minlength="6">
-    </div>
+if(r.error)return say(r.error.message);
 
-    <div class="field">
-      <label>تأكيد كلمة المرور</label>
-      <input id="confirmPassword" type="password" minlength="6">
-    </div>
+closeModal();
+say('تم إرسال رابط الاستعادة إلى بريدك.');
+}
 
-    <button onclick="saveNewPassword()">
-      حفظ كلمة المرور
-    </button>
-
-  `);
+function recoveryView(){
+modal('تعيين كلمة مرور جديدة',`
+<p class="muted">أدخل كلمة المرور الجديدة لحسابك.</p>
+<div class="field">
+<label>كلمة المرور الجديدة</label>
+<input id="newPassword" type="password" minlength="6">
+</div>
+<div class="field">
+<label>تأكيد كلمة المرور</label>
+<input id="confirmPassword" type="password" minlength="6">
+</div>
+<button onclick="saveNewPassword()">حفظ كلمة المرور</button>
+`);
 }
 
 async function saveNewPassword(){
+const p=$('newPassword').value;
+const c=$('confirmPassword').value;
 
-  const password = $('newPassword').value;
-  const confirm = $('confirmPassword').value;
+if(p.length<6)return say('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+if(p!==c)return say('كلمتا المرور غير متطابقتين');
 
-  if(password.length < 6){
-    return say('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
-  }
+const r=await db.auth.updateUser({password:p});
+if(r.error)return say(r.error.message);
 
-  if(password !== confirm){
-    return say('كلمتا المرور غير متطابقتين');
-  }
-
-  const r = await db.auth.updateUser({
-    password: password
-  });
-
-  if(r.error){
-    return say(r.error.message);
-  }
-
-  closeModal();
-
-  say('تم تغيير كلمة المرور بنجاح.');
-
-  await getProfile();
-
-  nav();
+closeModal();
+say('تم تغيير كلمة المرور بنجاح.');
+await getProfile();
+nav();
 }
-
-/* تسجيل الخروج */
 
 async function logout(){
-
-  await db.auth.signOut();
-
-  user = null;
-  profile = null;
-
-  nav();
-
-  say('تم تسجيل الخروج');
+await db.auth.signOut();
+user=null;
+profile=null;
+nav();
+say('تم تسجيل الخروج');
 }
 
-/* إنشاء الطلبات */
-
 async function checkout(){
+if(!user){
+closeModal();
+return authView();
+}
 
-  if(!user){
-    close();
-    return authView();
-  }
+appliedCoupon=null;
+couponQuote=null;
 
-  modal('بيانات الطلب',`
+modal('بيانات الطلب',`
+<div class="field">
+<label>الاسم</label>
+<input id="cname" value="${esc(profile?.full_name||'')}">
+</div>
+<div class="field">
+<label>الجوال</label>
+<input id="cphone" value="${esc(profile?.phone||'')}">
+</div>
+<div class="field">
+<label>كود الخصم (اختياري)</label>
+<div class="row">
+<input id="couponInput" placeholder="أدخل الكود" style="flex:1">
+<button class="secondary" onclick="applyCoupon()">تطبيق</button>
+</div>
+</div>
+<div id="couponResult" class="summary">
+السعر قبل الخصم: ${cash(cartSubtotal())}<br>
+قيمة الخصم: 0.00 ريال<br>
+<b>السعر بعد الخصم: ${cash(cartSubtotal())}</b>
+</div>
+<button onclick="createOrders()">إنشاء الطلبات</button>
+`);
+}
 
-    <div class="field">
-      <label>الاسم</label>
-      <input id="cname" value="${esc(profile?.full_name || '')}">
-    </div>
+async function applyCoupon(){
+const code=$('couponInput').value.trim();
 
-    <div class="field">
-      <label>الجوال</label>
-      <input id="cphone" value="${esc(profile?.phone || '')}">
-    </div>
+if(!code){
+appliedCoupon=null;
+couponQuote=null;
+return updateCouponSummary('أدخل كود الخصم');
+}
 
-    <button onclick="createOrders()">إنشاء الطلبات</button>
+const {data,error}=await db.rpc('preview_store_coupon',{
+p_coupon_code:code,
+p_subtotal:cartSubtotal()
+});
 
-  `);
+if(error){
+appliedCoupon=null;
+couponQuote=null;
+updateCouponSummary(error.message);
+return;
+}
+
+const q=Array.isArray(data)?data[0]:data;
+
+if(!q||q.valid===false){
+appliedCoupon=null;
+couponQuote=null;
+updateCouponSummary(q?.message||'كود الخصم غير صالح');
+return;
+}
+
+appliedCoupon=code.toUpperCase();
+couponQuote=q;
+updateCouponSummary('تم تطبيق كود الخصم بنجاح');
+}
+
+function updateCouponSummary(message=''){
+const subtotal=cartSubtotal();
+const discount=Number(couponQuote?.discount_amount||0);
+const total=Number(couponQuote?.total_after_discount??subtotal-discount);
+
+$('couponResult').innerHTML=`
+${message?`<div>${esc(message)}</div>`:''}
+السعر قبل الخصم: ${cash(subtotal)}<br>
+قيمة الخصم: ${cash(discount)}<br>
+<b>السعر بعد الخصم: ${cash(total)}</b>
+`;
 }
 
 async function createOrders(){
+const name=$('cname').value.trim();
+const phone=$('cphone').value.trim();
 
-  const name = $('cname').value.trim();
-  const phone = $('cphone').value.trim();
+if(!name||!phone)return say('أدخل الاسم ورقم الجوال');
 
-  if(!name || !phone){
-    return say('أدخل الاسم ورقم الجوال');
-  }
+const code=appliedCoupon;
 
-  for(const x of cart){
+for(const x of cart){
+for(let i=0;i<x.qty;i++){
+const r=await db.rpc('create_store_order_with_coupon',{
+p_product_id:x.id,
+p_customer_name:name,
+p_customer_phone:phone,
+p_coupon_code:code
+});
 
-    for(let i=0;i<x.qty;i++){
-
-      const r = await db.rpc('create_store_order',{
-
-        p_product_id:x.id,
-
-        p_customer_name:name,
-
-        p_customer_phone:phone
-
-      });
-
-      if(r.error){
-        return say(r.error.message);
-      }
-
-    }
-  }
-
-  cart = [];
-
-  $('count').textContent = '0';
-
-  close();
-
-  say('تم إنشاء طلباتك. يمكنك رفع إيصال التحويل من صفحة طلباتي.');
-
-  ordersView();
+if(r.error)return say(r.error.message);
+}
 }
 
-/* طلباتي */
+cart=[];
+$('count').textContent='0';
+closeModal();
+say('تم إنشاء طلباتك. يمكنك رفع إيصال التحويل من صفحة طلباتي.');
+await ordersView();
+}
 
 async function ordersView(){
+if(!user)return authView();
 
-  if(!user){
-    return authView();
-  }
+const r=await db.from('orders').select('*').eq('user_id',user.id).order('created_at',{ascending:false});
+if(r.error)return say(r.error.message);
 
-  const r = await db
-    .from('orders')
-    .select('*')
-    .eq('user_id',user.id)
-    .order('created_at',{ascending:false});
+const orders=r.data||[];
 
-  if(r.error){
-    return say(r.error.message);
-  }
+const rr=await db.from('reviews').select('order_id').eq('user_id',user.id);
+if(rr.error)return say(rr.error.message);
 
-  const orders = r.data || [];
+const reviewed=(rr.data||[]).map(x=>x.order_id);
 
-  const reviewsResult = await db
-    .from('reviews')
-    .select('order_id')
-    .eq('user_id',user.id);
-
-  if(reviewsResult.error){
-    return say(reviewsResult.error.message);
-  }
-
-  const reviewed = (reviewsResult.data || []).map(x=>x.order_id);
-
-  modal('طلباتي',orders.map(o=>`
-
-    <div class="card">
-
-      <b>${esc(o.product_name)}</b>
-
-      <p>${cash(o.total)}</p>
-
-      <p>
-        حالة الدفع:
-        <b>${esc(paymentLabel(o))}</b>
-      </p>
-
-      ${
-        o.payment_status === 'paid'
-        ? `
-          <div class="notice">
-            ${o.account_sent_at
-              ? 'تم إرسال بيانات الحساب إليك.'
-              : 'تم قبول الدفع. سيتم التواصل معك لإرسال بيانات الحساب.'}
-          </div>
-
-          ${
-            reviewed.includes(o.id)
-            ? '<div class="notice">✓ تم تقييم عملية الشراء</div>'
-            : `<button onclick="reviewForm('${o.id}','${o.product_id}')">⭐ قيّم مشتراك</button>`
-          }
-        `
-        : o.payment_status === 'under_review'
-        ? '<div class="notice">وصل إيصالك وهو قيد المراجعة.</div>'
-        : o.payment_status === 'rejected'
-        ? `
-          <div class="notice">
-            تم رفض الإيصال.
-            ${esc(o.rejection_reason || 'يرجى التواصل مع الإدارة.')}
-          </div>
-          <button onclick="receiptForm('${o.id}')">إعادة رفع الإيصال</button>
-        `
-        : `<button onclick="receiptForm('${o.id}')">رفع إيصال التحويل</button>`
-      }
-
-      <p class="muted small">
-        تاريخ الطلب:
-        ${o.created_at ? new Date(o.created_at).toLocaleString('ar-SA') : ''}
-      </p>
-
-    </div>
-
-  `).join('') || '<p class="empty">لا توجد طلبات</p>');
+modal('طلباتي',orders.map(o=>`
+<div class="card">
+<b>${esc(o.product_name)}</b>
+<p>السعر قبل الخصم: ${cash(o.subtotal??o.total)}</p>
+${o.coupon_code?`
+<p>كود الخصم: ${esc(o.coupon_code)}</p>
+<p>قيمة الخصم: ${cash(o.discount_amount)}</p>
+`:''}
+<p><b>المبلغ المطلوب: ${cash(o.total)}</b></p>
+<p>حالة الدفع: <b>${esc(paymentLabel(o))}</b></p>
+${o.payment_status==='paid'?`
+<div class="notice">
+${o.account_sent_at?'تم إرسال بيانات الحساب إليك.':'تم قبول الدفع. سيتم التواصل معك لإرسال بيانات الحساب.'}
+</div>
+${reviewed.includes(o.id)?'<div class="notice">✓ تم تقييم عملية الشراء</div>':`
+<button onclick="reviewForm('${o.id}','${o.product_id}')">⭐ قيّم مشتراك</button>
+`}
+`:o.payment_status==='under_review'?`
+<div class="notice">وصل إيصالك وهو قيد المراجعة.</div>
+`:o.payment_status==='rejected'?`
+<div class="notice">تم رفض الإيصال. ${esc(o.rejection_reason||'يرجى التواصل مع الإدارة.')}</div>
+<button onclick="receiptForm('${o.id}')">إعادة رفع الإيصال</button>
+`:`
+<button onclick="receiptForm('${o.id}')">رفع إيصال التحويل</button>
+`}
+<p class="muted small">تاريخ الطلب: ${o.created_at?new Date(o.created_at).toLocaleString('ar-SA'):''}</p>
+</div>
+`).join('')||'<p class="empty">لا توجد طلبات</p>');
 }
 
 function reviewForm(orderId,productId){
-
-  modal('تقييم مشتراك',`
-
-    <div class="field">
-      <label>التقييم بالنجوم</label>
-      <select id="reviewRating">
-        <option value="5">⭐⭐⭐⭐⭐ ممتاز</option>
-        <option value="4">⭐⭐⭐⭐ جيد جدًا</option>
-        <option value="3">⭐⭐⭐ جيد</option>
-        <option value="2">⭐⭐ سيئ</option>
-        <option value="1">⭐ سيئ جدًا</option>
-      </select>
-    </div>
-
-    <div class="field">
-      <label>اكتب رأيك</label>
-      <textarea id="reviewComment" rows="4"></textarea>
-    </div>
-
-    <button onclick="saveReview('${orderId}','${productId}')">
-      إرسال التقييم
-    </button>
-
-  `);
+modal('تقييم مشتراك',`
+<div class="field">
+<label>التقييم بالنجوم</label>
+<select id="reviewRating">
+<option value="5">⭐⭐⭐⭐⭐ ممتاز</option>
+<option value="4">⭐⭐⭐⭐ جيد جدًا</option>
+<option value="3">⭐⭐⭐ جيد</option>
+<option value="2">⭐⭐ سيئ</option>
+<option value="1">⭐ سيئ جدًا</option>
+</select>
+</div>
+<div class="field">
+<label>اكتب رأيك</label>
+<textarea id="reviewComment" rows="4"></textarea>
+</div>
+<button onclick="saveReview('${orderId}','${productId}')">إرسال التقييم</button>
+`);
 }
 
 async function saveReview(orderId,productId){
+if(!user)return authView();
 
-  if(!user) return authView();
+const r=await db.from('reviews').insert({
+user_id:user.id,
+product_id:productId,
+order_id:orderId,
+rating:Number($('reviewRating').value),
+comment:$('reviewComment').value.trim()
+});
 
-  const rating = Number($('reviewRating').value);
-  const comment = $('reviewComment').value.trim();
+if(r.error)return say(r.error.message);
 
-  const r = await db
-    .from('reviews')
-    .insert({
-      user_id:user.id,
-      product_id:productId,
-      order_id:orderId,
-      rating:rating,
-      comment:comment
-    });
-
-  if(r.error){
-    return say(r.error.message);
-  }
-
-  closeModal();
-  say('تم إرسال تقييمك بنجاح');
-  await ordersView();
+closeModal();
+say('تم إرسال تقييمك بنجاح');
+await getProducts();
+await ordersView();
 }
 
-/* رفع إيصال التحويل */
-
 function receiptForm(id){
-
-  modal('إيصال التحويل',`
-
-    <div class="notice">
-      ${esc(settings.bank_details || 'بيانات التحويل البنكي غير مضافة. تواصل مع الإدارة.')}
-    </div>
-
-    <div class="field">
-      <label>رقم العملية</label>
-      <input id="ref">
-    </div>
-
-    <div class="field">
-      <label>صورة الإيصال أو PDF</label>
-      <input id="receipt" type="file" accept="image/*,.pdf">
-    </div>
-
-    <button onclick="uploadReceipt('${id}')">
-      إرسال للمراجعة
-    </button>
-
-  `);
+modal('إيصال التحويل',`
+<div class="notice">
+${esc(settings.bank_details||'بيانات التحويل البنكي غير مضافة. تواصل مع الإدارة.')}
+</div>
+<div class="field">
+<label>رقم العملية</label>
+<input id="ref">
+</div>
+<div class="field">
+<label>صورة الإيصال أو PDF</label>
+<input id="receipt" type="file" accept="image/*,.pdf">
+</div>
+<button onclick="uploadReceipt('${id}')">إرسال للمراجعة</button>
+`);
 }
 
 async function uploadReceipt(id){
+const f=$('receipt').files[0];
 
-  const f = $('receipt').files[0];
+if(!f)return say('اختر ملف الإيصال');
+if(f.size>8*1024*1024)return say('حجم الإيصال يجب ألا يتجاوز 8 ميجابايت');
 
-  if(!f){
-    return say('اختر ملف الإيصال');
-  }
+const safe=f.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+const path=`${id}/${user.id}/${Date.now()}_${safe}`;
 
-  if(f.size > 8*1024*1024){
-    return say('حجم الإيصال يجب ألا يتجاوز 8 ميجابايت');
-  }
+const u=await db.storage.from('payment-receipts').upload(path,f);
+if(u.error)return say('تعذر رفع الإيصال: '+u.error.message);
 
-  const safe = f.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+const r=await db.rpc('submit_payment_receipt',{
+p_order_id:id,
+p_receipt_path:path,
+p_payment_reference:$('ref').value.trim()
+});
 
-  const path =
-    `${id}/${user.id}/${Date.now()}_${safe}`;
+if(r.error)return say('تم رفع الملف لكن تعذر تسجيله: '+r.error.message);
 
-  const u = await db.storage
-    .from('payment-receipts')
-    .upload(path,f);
-
-  if(u.error){
-    return say('تعذر رفع الإيصال: '+u.error.message);
-  }
-
-  const r = await db.rpc('submit_payment_receipt',{
-
-    p_order_id:id,
-
-    p_receipt_path:path,
-
-    p_payment_reference:$('ref').value.trim()
-
-  });
-
-  if(r.error){
-    return say('تم رفع الملف لكن تعذر تسجيله: '+r.error.message);
-  }
-
-  close();
-
-  say('تم إرسال الإيصال للمراجعة');
-
-  ordersView();
+closeModal();
+say('تم إرسال الإيصال للمراجعة');
+ordersView();
 }
-
-/* لوحة الإدارة */
 
 async function staffView(){
+if(!isStaff())return say('ليس لديك صلاحية');
 
-  if(!isStaff()){
-    return say('ليس لديك صلاحية');
-  }
+const [a,b,c]=await Promise.all([
+db.from('orders').select('*').order('created_at',{ascending:false}),
+db.from('products').select('*').order('created_at',{ascending:false}),
+db.from('coupons').select('*').order('created_at',{ascending:false})
+]);
 
-  const [a,b] = await Promise.all([
+if(a.error)return say('تعذر تحميل الطلبات: '+a.error.message);
+if(b.error)return say('تعذر تحميل المنتجات: '+b.error.message);
+if(c.error)return say('تعذر تحميل أكواد الخصم: '+c.error.message);
 
-    db.from('orders')
-      .select('*')
-      .order('created_at',{ascending:false}),
+const oh=(a.data||[]).map(o=>`
+<tr>
+<td><b>${esc(o.product_name)}</b><div class="small muted">${esc(o.id)}</div></td>
+<td>
+${esc(o.customer_name)}
+<div class="small">${esc(o.customer_email||'البريد غير مسجل')}</div>
+<div class="small">${esc(o.customer_phone||'الجوال غير مسجل')}</div>
+</td>
+<td>
+قبل الخصم: ${cash(o.subtotal??o.total)}
+<div class="small">الخصم: ${cash(o.discount_amount)}</div>
+<div class="small">${o.coupon_code?'الكود: '+esc(o.coupon_code):'بدون كود'}</div>
+<b>النهائي: ${cash(o.total)}</b>
+</td>
+<td>
+${esc(paymentLabel(o))}
+<div class="small muted">${o.created_at?new Date(o.created_at).toLocaleString('ar-SA'):''}</div>
+</td>
+<td>
+<div class="actions">
+<button class="secondary" onclick="orderDetails('${o.id}')">التفاصيل</button>
+${o.receipt_path?`<button class="secondary" onclick="showReceipt('${o.id}')">عرض الإيصال</button>`:''}
+${o.payment_status==='under_review'?`
+<button class="success" onclick="approve('${o.id}')">قبول</button>
+<button class="danger" onclick="reject('${o.id}')">رفض</button>
+`:''}
+${o.payment_status==='paid'&&!o.account_sent_at?`
+<button onclick="markAccountSent('${o.id}')">تم إرسال بيانات الحساب</button>
+`:''}
+${o.account_sent_at?'<span class="small">تم إرسال البيانات</span>':''}
+</div>
+</td>
+</tr>
+`).join('');
 
-    db.from('products')
-      .select('*')
-      .order('created_at',{ascending:false})
+const ph=(b.data||[]).map(p=>`
+<tr>
+<td>${esc(p.name)}</td>
+<td>${cash(p.price)}</td>
+<td><button class="secondary" onclick="edit('${p.id}')">تعديل</button></td>
+</tr>
+`).join('');
 
-  ]);
+const ch=(c.data||[]).map(x=>`
+<tr>
+<td><b>${esc(x.code)}</b></td>
+<td>${x.discount_type==='percent'?esc(x.discount_value)+'%':cash(x.discount_value)}</td>
+<td>${x.usage_count}/${x.usage_limit??'غير محدود'}</td>
+<td>${x.expires_at?new Date(x.expires_at).toLocaleString('ar-SA'):'بدون انتهاء'}</td>
+<td>${x.is_active?'مفعل':'متوقف'}</td>
+<td>
+<div class="actions">
+<button class="secondary" onclick="editCoupon('${x.id}')">تعديل</button>
+<button class="${x.is_active?'danger':'success'}" onclick="toggleCoupon('${x.id}',${!x.is_active})">
+${x.is_active?'إيقاف':'تفعيل'}
+</button>
+</div>
+</td>
+</tr>
+`).join('');
 
-  if(a.error){
-    return say('تعذر تحميل الطلبات: '+a.error.message);
-  }
+modal('لوحة الإدارة',`
+<button onclick="productForm()">إضافة منتج</button>
+<button onclick="couponForm()">إنشاء كود خصم</button>
 
-  if(b.error){
-    return say('تعذر تحميل المنتجات: '+b.error.message);
-  }
+<h3>أكواد الخصم</h3>
+<div class="scroll">
+<table>
+<tr><th>الكود</th><th>الخصم</th><th>الاستخدام</th><th>الانتهاء</th><th>الحالة</th><th>إدارة</th></tr>
+${ch||'<tr><td colspan="6">لا توجد أكواد خصم</td></tr>'}
+</table>
+</div>
 
-  const oh = (a.data || []).map(o=>`
+<h3>الطلبات</h3>
+<div class="scroll">
+<table>
+<tr><th>المنتج</th><th>بيانات العميل</th><th>تفاصيل المبلغ</th><th>الحالة والتاريخ</th><th>الإجراءات</th></tr>
+${oh||'<tr><td colspan="5">لا توجد طلبات</td></tr>'}
+</table>
+</div>
 
-    <tr>
-
-      <td>
-        <b>${esc(o.product_name)}</b>
-        <div class="small muted">${esc(o.id)}</div>
-      </td>
-
-      <td>
-        ${esc(o.customer_name)}
-
-        <div class="small">
-          ${esc(o.customer_email || 'البريد غير مسجل')}
-        </div>
-
-        <div class="small">
-          ${esc(o.customer_phone || 'الجوال غير مسجل')}
-        </div>
-      </td>
-
-      <td>${cash(o.total)}</td>
-
-      <td>
-        ${esc(paymentLabel(o))}
-        <div class="small muted">
-          ${o.created_at ? new Date(o.created_at).toLocaleString('ar-SA') : ''}
-        </div>
-      </td>
-
-      <td>
-        <div class="actions">
-
-          <button class="secondary"
-            onclick="orderDetails('${o.id}')">
-            التفاصيل
-          </button>
-
-          ${
-            o.receipt_path
-            ? `<button class="secondary" onclick="showReceipt('${o.id}')">عرض الإيصال</button>`
-            : ''
-          }
-
-          ${
-            o.payment_status === 'under_review'
-            ? `
-              <button class="success" onclick="approve('${o.id}')">قبول</button>
-              <button class="danger" onclick="reject('${o.id}')">رفض</button>
-            `
-            : ''
-          }
-
-          ${
-            o.payment_status === 'paid' && !o.account_sent_at
-            ? `<button onclick="markAccountSent('${o.id}')">تم إرسال بيانات الحساب</button>`
-            : ''
-          }
-
-          ${
-            o.account_sent_at
-            ? '<span class="small">تم إرسال البيانات</span>'
-            : ''
-          }
-
-        </div>
-      </td>
-
-    </tr>
-
-  `).join('');
-
-  const ph = (b.data || []).map(p=>`
-
-    <tr>
-      <td>${esc(p.name)}</td>
-      <td>${cash(p.price)}</td>
-      <td>
-        <button class="secondary" onclick="edit('${p.id}')">تعديل</button>
-      </td>
-    </tr>
-
-  `).join('');
-
-  modal('لوحة الإدارة',`
-
-    <button onclick="productForm()">إضافة منتج</button>
-
-    <h3>الطلبات</h3>
-
-    <div class="scroll">
-      <table>
-        <tr>
-          <th>المنتج</th>
-          <th>بيانات العميل</th>
-          <th>المبلغ</th>
-          <th>الحالة والتاريخ</th>
-          <th>الإجراءات</th>
-        </tr>
-
-        ${oh || '<tr><td colspan="5">لا توجد طلبات</td></tr>'}
-
-      </table>
-    </div>
-
-    <h3>المنتجات</h3>
-
-    <div class="scroll">
-      <table>
-        <tr>
-          <th>الاسم</th>
-          <th>السعر</th>
-          <th>تعديل</th>
-        </tr>
-
-        ${ph}
-
-      </table>
-    </div>
-
-  `);
+<h3>المنتجات</h3>
+<div class="scroll">
+<table>
+<tr><th>الاسم</th><th>السعر</th><th>تعديل</th></tr>
+${ph}
+</table>
+</div>
+`);
 }
 
-/* تفاصيل الطلب */
+function couponForm(c={}){
+modal(c.id?'تعديل كود خصم':'إنشاء كود خصم',`
+<div class="field">
+<label>الكود</label>
+<input id="cpCode" value="${esc(c.code||'')}" placeholder="SAVE20">
+</div>
+<div class="field">
+<label>نوع الخصم</label>
+<select id="cpType">
+<option value="percent" ${c.discount_type==='percent'?'selected':''}>نسبة مئوية</option>
+<option value="fixed" ${c.discount_type==='fixed'?'selected':''}>مبلغ ثابت</option>
+</select>
+</div>
+<div class="field">
+<label>قيمة الخصم</label>
+<input id="cpValue" type="number" min="0.01" step="0.01" value="${c.discount_value??''}">
+</div>
+<div class="field">
+<label>تاريخ الانتهاء (اختياري)</label>
+<input id="cpExpiry" type="datetime-local" value="${c.expires_at?new Date(new Date(c.expires_at).getTime()-new Date(c.expires_at).getTimezoneOffset()*60000).toISOString().slice(0,16):''}">
+</div>
+<div class="field">
+<label>الحد الأقصى للاستخدام (اتركه فارغًا بلا حد)</label>
+<input id="cpLimit" type="number" min="1" value="${c.usage_limit??''}">
+</div>
+<label><input id="cpActive" type="checkbox" ${c.is_active===false?'':'checked'}> الكود مفعل</label>
+<p><button onclick="saveCoupon('${c.id||''}')">حفظ الكود</button></p>
+`);
+}
+
+async function editCoupon(id){
+const r=await db.from('coupons').select('*').eq('id',id).single();
+if(r.error)return say(r.error.message);
+couponForm(r.data);
+}
+
+async function saveCoupon(id){
+const code=$('cpCode').value.trim().toUpperCase().replace(/\s+/g,'');
+const type=$('cpType').value;
+const value=Number($('cpValue').value);
+const limit=$('cpLimit').value.trim();
+const expiry=$('cpExpiry').value;
+
+if(!/^[A-Z0-9_-]{3,40}$/.test(code))
+return say('اكتب كودًا من 3 إلى 40 حرفًا أو رقمًا دون مسافات');
+
+if(!Number.isFinite(value)||value<=0||(type==='percent'&&value>100))
+return say('قيمة الخصم غير صحيحة');
+
+if(limit&&(!Number.isInteger(Number(limit))||Number(limit)<1))
+return say('حد الاستخدام غير صحيح');
+
+const payload={
+code,
+discount_type:type,
+discount_value:value,
+usage_limit:limit?Number(limit):null,
+expires_at:expiry?new Date(expiry).toISOString():null,
+is_active:$('cpActive').checked
+};
+
+const r=id
+?await db.from('coupons').update(payload).eq('id',id)
+:await db.from('coupons').insert(payload);
+
+if(r.error)return say(r.error.message);
+
+say('تم حفظ كود الخصم');
+await staffView();
+}
+
+async function toggleCoupon(id,active){
+const r=await db.from('coupons').update({is_active:active}).eq('id',id);
+if(r.error)return say(r.error.message);
+say(active?'تم تفعيل الكود':'تم إيقاف الكود');
+staffView();
+}
 
 async function orderDetails(id){
+const r=await db.from('orders').select('*').eq('id',id).single();
+if(r.error)return say(r.error.message);
 
-  const r = await db
-    .from('orders')
-    .select('*')
-    .eq('id',id)
-    .single();
+const o=r.data;
 
-  if(r.error){
-    return say(r.error.message);
-  }
-
-  const o = r.data;
-
-  modal('تفاصيل الطلب',`
-
-    <div class="card">
-
-      <p><b>المنتج:</b> ${esc(o.product_name)}</p>
-
-      <p><b>اسم العميل:</b> ${esc(o.customer_name)}</p>
-
-      <p><b>البريد الإلكتروني:</b>
-        ${esc(o.customer_email || 'غير مسجل')}
-      </p>
-
-      <p><b>الجوال:</b>
-        ${esc(o.customer_phone || 'غير مسجل')}
-      </p>
-
-      <p><b>المبلغ:</b> ${cash(o.total)}</p>
-
-      <p><b>حالة الدفع:</b> ${esc(paymentLabel(o))}</p>
-
-      <p><b>رقم العملية:</b>
-        ${esc(o.payment_reference || 'غير مضاف')}
-      </p>
-
-      <p><b>تاريخ الطلب:</b>
-        ${o.created_at ? new Date(o.created_at).toLocaleString('ar-SA') : ''}
-      </p>
-
-      ${
-        o.rejection_reason
-        ? `<p><b>سبب الرفض:</b> ${esc(o.rejection_reason)}</p>`
-        : ''
-      }
-
-      ${
-        o.receipt_path
-        ? `<button onclick="showReceipt('${o.id}')">فتح إيصال التحويل</button>`
-        : '<p class="muted">لم يرفع العميل إيصالًا بعد.</p>'
-      }
-
-    </div>
-
-  `);
+modal('تفاصيل الطلب',`
+<div class="card">
+<p><b>المنتج:</b> ${esc(o.product_name)}</p>
+<p><b>اسم العميل:</b> ${esc(o.customer_name)}</p>
+<p><b>البريد:</b> ${esc(o.customer_email||'غير مسجل')}</p>
+<p><b>الجوال:</b> ${esc(o.customer_phone||'غير مسجل')}</p>
+<hr>
+<p>السعر قبل الخصم: ${cash(o.subtotal??o.total)}</p>
+<p>كود الخصم: ${esc(o.coupon_code||'لا يوجد')}</p>
+<p>قيمة الخصم: ${cash(o.discount_amount)}</p>
+<p><b>السعر النهائي: ${cash(o.total)}</b></p>
+<p>حالة الدفع: ${esc(paymentLabel(o))}</p>
+<p>رقم العملية: ${esc(o.payment_reference||'غير مضاف')}</p>
+<p>تاريخ الطلب: ${o.created_at?new Date(o.created_at).toLocaleString('ar-SA'):''}</p>
+${o.rejection_reason?`<p>سبب الرفض: ${esc(o.rejection_reason)}</p>`:''}
+${o.receipt_path?`<button onclick="showReceipt('${o.id}')">فتح إيصال التحويل</button>`:'<p class="muted">لم يرفع العميل إيصالًا بعد.</p>'}
+</div>
+`);
 }
-
-/* عرض الإيصال */
 
 async function showReceipt(id){
+if(!isStaff())return say('ليس لديك صلاحية');
 
-  if(!isStaff()){
-    return say('ليس لديك صلاحية');
-  }
+const q=await db.from('orders').select('receipt_path').eq('id',id).single();
+if(q.error)return say(q.error.message);
+if(!q.data.receipt_path)return say('لا يوجد إيصال لهذا الطلب');
 
-  const q = await db
-    .from('orders')
-    .select('receipt_path')
-    .eq('id',id)
-    .single();
+const r=await db.storage.from('payment-receipts').createSignedUrl(q.data.receipt_path,120);
+if(r.error)return say('تعذر فتح الإيصال: '+r.error.message);
 
-  if(q.error){
-    return say(q.error.message);
-  }
-
-  if(!q.data.receipt_path){
-    return say('لا يوجد إيصال لهذا الطلب');
-  }
-
-  const r = await db.storage
-    .from('payment-receipts')
-    .createSignedUrl(q.data.receipt_path,120);
-
-  if(r.error){
-    return say('تعذر فتح الإيصال. تحقق من صلاحيات التخزين: '+r.error.message);
-  }
-
-  window.open(r.data.signedUrl,'_blank','noopener');
+window.open(r.data.signedUrl,'_blank','noopener');
 }
-
-/* تسجيل إرسال بيانات الحساب */
 
 async function markAccountSent(id){
+if(!isStaff())return say('ليس لديك صلاحية');
+if(!confirm('هل أرسلت بيانات الحساب للعميل بالفعل؟'))return;
 
-  if(!isStaff()){
-    return say('ليس لديك صلاحية');
-  }
+const r=await db.rpc('mark_account_sent',{p_order_id:id});
+if(r.error)return say(r.error.message);
 
-  if(!confirm('هل أرسلت بيانات الحساب للعميل بالفعل؟')){
-    return;
-  }
-
-  const r = await db.rpc('mark_account_sent',{
-    p_order_id:id
-  });
-
-  if(r.error){
-    return say(r.error.message);
-  }
-
-  say('تم تسجيل إرسال بيانات الحساب');
-
-  staffView();
+say('تم تسجيل إرسال بيانات الحساب');
+staffView();
 }
-
-/* اعتماد الدفع */
 
 async function approve(id){
+const r=await db.rpc('approve_store_payment',{p_order_id:id});
+if(r.error)return say(r.error.message);
 
-  const r = await db.rpc('approve_store_payment',{
-    p_order_id:id
-  });
-
-  if(r.error){
-    return say(r.error.message);
-  }
-
-  say('تم اعتماد الدفع');
-
-  staffView();
+say('تم اعتماد الدفع');
+staffView();
 }
-
-/* رفض الدفع */
 
 async function reject(id){
+const reason=prompt('سبب الرفض')||'';
+const r=await db.rpc('reject_store_payment',{
+p_order_id:id,
+p_reason:reason
+});
 
-  const reason = prompt('سبب الرفض') || '';
+if(r.error)return say(r.error.message);
 
-  const r = await db.rpc('reject_store_payment',{
-
-    p_order_id:id,
-
-    p_reason:reason
-
-  });
-
-  if(r.error){
-    return say(r.error.message);
-  }
-
-  say('تم رفض الإيصال');
-
-  staffView();
+say('تم رفض الإيصال');
+staffView();
 }
 
-/* إضافة وتعديل المنتجات */
-
 function productForm(p={}){
-
-  modal(p.id?'تعديل منتج':'إضافة منتج',`
-
-    <div class="field">
-      <label>اسم المنتج</label>
-      <input id="pn" value="${esc(p.name || '')}">
-    </div>
-
-    <div class="field">
-      <label>الوصف</label>
-      <textarea id="pd">${esc(p.description || '')}</textarea>
-    </div>
-
-    <div class="field">
-      <label>السعر</label>
-      <input id="pp" type="number" min="0" step="0.01" value="${p.price ?? ''}">
-    </div>
-
-    <div class="field">
-      <label>التصنيف</label>
-      <input id="pc" value="${esc(p.category || '')}">
-    </div>
-
-    <div class="field">
-      <label>المخزون</label>
-      <input id="ps" type="number" min="0" value="${p.stock ?? 0}">
-    </div>
-
-    <label>
-      <input id="pu" type="checkbox" ${p.is_unlimited?'checked':''}>
-      مخزون غير محدود
-    </label>
-
-    <div class="field">
-      <label>صورة المنتج</label>
-      <input id="pi" type="file" accept="image/*">
-    </div>
-
-    <label>
-      <input id="pa" type="checkbox" ${p.is_active===false?'':'checked'}>
-      مفعّل
-    </label>
-
-    <p>
-      <button onclick="saveProduct('${p.id || ''}')">حفظ</button>
-    </p>
-
-  `);
+modal(p.id?'تعديل منتج':'إضافة منتج',`
+<div class="field"><label>اسم المنتج</label><input id="pn" value="${esc(p.name||'')}"></div>
+<div class="field"><label>الوصف</label><textarea id="pd">${esc(p.description||'')}</textarea></div>
+<div class="field"><label>السعر</label><input id="pp" type="number" min="0" step="0.01" value="${p.price??''}"></div>
+<div class="field"><label>التصنيف</label><input id="pc" value="${esc(p.category||'')}"></div>
+<div class="field"><label>المخزون</label><input id="ps" type="number" min="0" value="${p.stock??0}"></div>
+<label><input id="pu" type="checkbox" ${p.is_unlimited?'checked':''}> مخزون غير محدود</label>
+<div class="field"><label>صورة المنتج</label><input id="pi" type="file" accept="image/*"></div>
+<label><input id="pa" type="checkbox" ${p.is_active===false?'':'checked'}> مفعّل</label>
+<p><button onclick="saveProduct('${p.id||''}')">حفظ</button></p>
+`);
 }
 
 async function edit(id){
+let p=products.find(x=>x.id===id);
 
-  let p = products.find(x=>x.id===id);
-
-  if(!p){
-
-    const r = await db
-      .from('products')
-      .select('*')
-      .eq('id',id)
-      .single();
-
-    if(r.error){
-      return say(r.error.message);
-    }
-
-    p = r.data;
-  }
-
-  productForm(p || {});
+if(!p){
+const r=await db.from('products').select('*').eq('id',id).single();
+if(r.error)return say(r.error.message);
+p=r.data;
 }
 
-/* حفظ المنتج */
+productForm(p||{});
+}
 
 async function saveProduct(id){
+const v={
+name:$('pn').value.trim(),
+description:$('pd').value,
+price:Number($('pp').value),
+category:$('pc').value.trim(),
+stock:Number($('ps').value||0),
+is_unlimited:$('pu').checked,
+is_active:$('pa').checked,
+updated_at:new Date().toISOString()
+};
 
-  const v = {
+if(!v.name)return say('اكتب اسم المنتج');
+if(!Number.isFinite(v.price)||v.price<0)return say('تحقق من السعر');
+if(!Number.isFinite(v.stock)||v.stock<0)return say('تحقق من المخزون');
 
-    name:$('pn').value.trim(),
+const r=id
+?await db.from('products').update(v).eq('id',id).select().single()
+:await db.from('products').insert(v).select().single();
 
-    description:$('pd').value,
+if(r.error)return say(r.error.message);
 
-    price:Number($('pp').value),
+const pid=r.data.id;
+const img=$('pi').files[0];
 
-    category:$('pc').value.trim(),
+if(img){
+const path=pid+'/'+Date.now()+'_'+img.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+const u=await db.storage.from('product-images').upload(path,img);
 
-    stock:Number($('ps').value || 0),
+if(u.error)return say('تم حفظ المنتج لكن تعذر رفع الصورة: '+u.error.message);
 
-    is_unlimited:$('pu').checked,
+const url=db.storage.from('product-images').getPublicUrl(path).data.publicUrl;
+const up=await db.from('products').update({image_url:url}).eq('id',pid);
 
-    is_active:$('pa').checked,
-
-    updated_at:new Date().toISOString()
-
-  };
-
-  if(!v.name){
-    return say('اكتب اسم المنتج');
-  }
-
-  if(!Number.isFinite(v.price) || v.price < 0){
-    return say('تحقق من السعر');
-  }
-
-  if(!Number.isFinite(v.stock) || v.stock < 0){
-    return say('تحقق من المخزون');
-  }
-
-  const r = id
-    ? await db.from('products').update(v).eq('id',id).select().single()
-    : await db.from('products').insert(v).select().single();
-
-  if(r.error){
-    return say(r.error.message);
-  }
-
-  const pid = r.data.id;
-
-  const img = $('pi').files[0];
-
-  if(img){
-
-    const path =
-      pid+'/'+Date.now()+'_'+img.name.replace(/[^a-zA-Z0-9._-]/g,'_');
-
-    const u = await db.storage
-      .from('product-images')
-      .upload(path,img);
-
-    if(u.error){
-      return say('تم حفظ المنتج لكن تعذر رفع الصورة: '+u.error.message);
-    }
-
-    const imageUrl = db.storage
-      .from('product-images')
-      .getPublicUrl(path).data.publicUrl;
-
-    const update = await db
-      .from('products')
-      .update({image_url:imageUrl})
-      .eq('id',pid);
-
-    if(update.error){
-      return say(update.error.message);
-    }
-  }
-
-  close();
-
-  say('تم حفظ المنتج');
-
-  await getProducts();
-
-  staffView();
+if(up.error)return say(up.error.message);
 }
 
-/* بدء التشغيل */
+closeModal();
+say('تم حفظ المنتج');
+await getProducts();
+staffView();
+}
 
-init().catch(e=>{
-  say(e.message || 'حدث خطأ أثناء تشغيل المتجر');
-});
-
+init().catch(e=>say(e.message||'حدث خطأ أثناء تشغيل المتجر'));
 </script>
 </body>
 </html>
