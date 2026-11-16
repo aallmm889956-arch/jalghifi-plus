@@ -151,7 +151,32 @@ if(adminTab==='settings')return `<div class="notice">إعدادات المتجر
 return '';}
 function ordersTable(list){return `<div class="scroll"><table><tr><th>الطلب</th><th>العميل</th><th>المبلغ</th><th>الحالة</th><th>الإجراءات</th></tr>${list.map(o=>`<tr><td><b>${esc(o.product_name)}</b><div class="small muted">${esc(o.id)}</div></td><td>${esc(o.customer_name)}<div class="small">${esc(o.customer_email||'البريد غير مسجل')}</div><div class="small">${esc(o.customer_phone||'الجوال غير مسجل')}</div></td><td>${cash(o.total)}<div class="small muted">قبل الخصم ${cash(o.subtotal??o.total)}</div></td><td>${esc(paymentLabel(o))}<div class="small muted">${o.account_sent_at?'تم التسليم':o.payment_status==='paid'?'بانتظار التسليم':''}</div></td><td><div class="actions"><button class="secondary" onclick="orderDetails('${o.id}')">تفاصيل</button>${o.receipt_path?`<button class="secondary" onclick="showReceipt('${o.id}')">الإيصال</button>`:''}${o.payment_status==='under_review'?`<button class="success" onclick="approve('${o.id}')">قبول</button><button class="danger" onclick="reject('${o.id}')">رفض</button>`:''}${o.payment_status==='paid'&&!o.account_sent_at?`<button onclick="markAccountSent('${o.id}')">تم الإرسال بالبريد</button>`:''}${o.account_sent_at?'<span class="pill">تم التسليم</span>':''}</div></td></tr>`).join('')||'<tr><td colspan="5">لا توجد طلبات.</td></tr>'}</table></div>`;}
 function filterAdminOrders(){const q=($('orderSearch').value||'').toLowerCase();$('ordersTable').innerHTML=ordersTable(adminCache.orders.filter(o=>[o.id,o.product_name,o.customer_name,o.customer_email,o.customer_phone].some(v=>String(v||'').toLowerCase().includes(q))));}
-async function saveSettings(){if(!isAdmin())return say('هذه الخاصية للمدير فقط','bad');const value=$('bankDetails').value.trim();const r=await db.from('store_settings').upsert({key:'bank_details',value},{onConflict:'key'});if(r.error)return say('تعذر حفظ الإعدادات: '+r.error.message,'bad');settings.bank_details=value;say('تم حفظ بيانات التحويل البنكي','ok');}
+async function saveSettings(){
+  if(!isAdmin()) return say('هذه الخاصية للمدير فقط','bad');
+
+  const value = $('bankDetails').value.trim();
+
+  const updated = await db
+    .from('store_settings')
+    .update({value})
+    .eq('key','bank_details')
+    .select();
+
+  if(updated.error)
+    return say('تعذر حفظ الإعدادات: '+updated.error.message,'bad');
+
+  if(!updated.data || updated.data.length === 0){
+    const inserted = await db
+      .from('store_settings')
+      .insert({key:'bank_details',value});
+
+    if(inserted.error)
+      return say('تعذر إضافة الإعدادات: '+inserted.error.message,'bad');
+  }
+
+  settings.bank_details = value;
+  say('تم حفظ بيانات التحويل البنكي','ok');
+}
 async function toggleProduct(id,active){if(!isStaff())return say('ليس لديك صلاحية','bad');const r=await db.from('products').update({is_active:active,updated_at:new Date().toISOString()}).eq('id',id);if(r.error)return say(r.error.message,'bad');say(active?'تم إظهار المنتج':'تم إخفاء المنتج','ok');await staffView();await getProducts();}
 function couponForm(c={}){modal(c.id?'تعديل كود خصم':'إنشاء كود خصم',`<div class="field"><label>الكود</label><input id="cpCode" value="${esc(c.code||'')}" placeholder="SAVE20"></div><div class="field"><label>نوع الخصم</label><select id="cpType"><option value="percent" ${c.discount_type==='percent'?'selected':''}>نسبة مئوية</option><option value="fixed" ${c.discount_type==='fixed'?'selected':''}>مبلغ ثابت</option></select></div><div class="field"><label>قيمة الخصم</label><input id="cpValue" type="number" min="0.01" step="0.01" value="${c.discount_value??''}"></div><div class="field"><label>تاريخ الانتهاء</label><input id="cpExpiry" type="datetime-local" value="${c.expires_at?new Date(new Date(c.expires_at).getTime()-new Date(c.expires_at).getTimezoneOffset()*60000).toISOString().slice(0,16):''}"></div><div class="field"><label>الحد الأقصى للاستخدام</label><input id="cpLimit" type="number" min="1" value="${c.usage_limit??''}"></div><label><input id="cpActive" type="checkbox" ${c.is_active===false?'':'checked'}> الكود مفعل</label><p><button onclick="saveCoupon('${c.id||''}')">حفظ الكود</button></p>`);}
 async function editCoupon(id){const r=await db.from('coupons').select('*').eq('id',id).single();if(r.error)return say(r.error.message,'bad');couponForm(r.data);}
