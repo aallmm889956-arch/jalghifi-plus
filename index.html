@@ -141,24 +141,50 @@
     return String(value ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[ch]));
   }
 
-  async function checkUser() {
-    const {data,error} = await db.auth.getUser();
-    if (error) throw error;
-    currentUser = data.user || null; currentRole = null;
-    $("loginBtn").classList.toggle("hidden",!!currentUser);
-    $("logoutBtn").classList.toggle("hidden",!currentUser);
-    $("staffPanel").classList.add("hidden");
-    if (!currentUser) return;
+ async function checkUser() {
+  const { data, error } = await db.auth.getSession();
 
-    const {data:profile,error:profileError} = await db.from("profiles").select("full_name, role").eq("id",currentUser.id).maybeSingle();
-    if (profileError) { $("welcome").textContent = "تعذر قراءة صلاحية الحساب: " + profileError.message; return; }
-    if (!profile) { $("welcome").textContent = "الحساب مسجل، لكن لا يوجد سجل له في profiles. يلزم إعداد ملف العميل في قاعدة البيانات."; return; }
-    currentRole = profile.role;
-    if (staffRoles.includes(currentRole)) {
-      $("staffPanel").classList.remove("hidden");
-      $("welcome").textContent = "مرحباً " + (profile.full_name || currentUser.email) + " — الصلاحية: " + currentRole;
-    }
+  if (error) throw error;
+
+  const session = data.session;
+  currentUser = session?.user || null;
+  currentRole = null;
+
+  $("loginBtn").classList.toggle("hidden", !!currentUser);
+  $("logoutBtn").classList.toggle("hidden", !currentUser);
+  $("staffPanel").classList.add("hidden");
+
+  if (!currentUser) {
+    $("manageProducts").innerHTML = "";
+    return;
   }
+
+  const { data: profile, error: profileError } = await db
+    .from("profiles")
+    .select("full_name, role")
+    .eq("id", currentUser.id)
+    .maybeSingle();
+
+  if (profileError) {
+    $("welcome").textContent = profileError.message;
+    return;
+  }
+
+  if (!profile) {
+    $("welcome").textContent = "لا يوجد ملف لهذا الحساب في profiles.";
+    return;
+  }
+
+  currentRole = profile.role;
+
+  if (staffRoles.includes(currentRole)) {
+    $("staffPanel").classList.remove("hidden");
+    $("welcome").textContent =
+      "مرحباً " + (profile.full_name || currentUser.email);
+  }
+
+  renderManageProducts();
+}
 
   async function loadProducts() {
     $("products").innerHTML = '<p class="muted">جاري تحميل المنتجات...</p>';
