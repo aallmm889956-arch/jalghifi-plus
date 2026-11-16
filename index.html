@@ -86,7 +86,17 @@ function refreshWhatsapp(){const a=$('heroWhatsapp');if(!a)return;const url=what
 function isStaff(){return !!user&&profile?.is_active!==false&&['admin','employee'].includes(profile?.role);}
 function isAdmin(){return profile?.role==='admin'&&profile?.is_active!==false;}
 function canDo(permission){return isAdmin()||(isStaff()&&Array.isArray(profile?.permissions)&&profile.permissions.includes(permission));}
-function updateIdentity(){const el=$('staffIdentity');if(!el)return;const show=isStaff()&&profile?.role==='employee';el.textContent=show?`${profile.full_name||user?.email||'موظف'} — ${profile.job_title||'موظف'}`:'';el.classList.toggle('hidden',!show);}
+function updateIdentity(){
+ const el=$('staffIdentity');
+ if(!el)return;
+
+ const show=isStaff();
+ const name=profile?.full_name||user?.email||'مستخدم';
+ const rank=isAdmin()?'المدير':(profile?.job_title||'موظف');
+
+ el.textContent=show?`${name} — ${rank}`:'';
+ el.classList.toggle('hidden',!show);
+}
 function paymentLabel(o){const s=o.payment_status||o.status;return ({pending:'بانتظار الدفع',under_review:'الإيصال قيد المراجعة',paid:'تم قبول الدفع',rejected:'تم رفض الإيصال'})[s]||s||'غير محدد';}
 function orderStatusLabel(o){return o.account_sent_at?'تم التسليم عبر البريد':o.payment_status==='paid'?'تم اعتماد الدفع — بانتظار التسليم':paymentLabel(o);}
 function nav(){$('loginBtn').classList.toggle('hidden',!!user);$('logoutBtn').classList.toggle('hidden',!user);$('ordersBtn').classList.toggle('hidden',!user);$('staffBtn').classList.toggle('hidden',!isStaff());updateIdentity();}
