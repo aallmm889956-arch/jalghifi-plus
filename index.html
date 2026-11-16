@@ -64,37 +64,38 @@ td,th{text-align:right;padding:9px;border-bottom:1px solid var(--line);vertical-
 <div id="message" class="notice hidden"></div>
 
 <section id="products">
-<h2>المنتجات</h2>
-<div id="grid" class="grid"><div class="empty">جاري التحميل…</div></div>
+<h2>تسوّق المنتجات</h2>
+
+<div class="card" style="margin-bottom:18px">
+
+<input
+id="searchProducts"
+type="search"
+placeholder="ابحث عن منتج..."
+oninput="render()"
+style="width:100%;padding:13px;border-radius:10px;margin-bottom:12px"
+>
+
+<div class="row" style="flex-wrap:wrap">
+
+<select id="categoryFilter"
+onchange="render()"
+style="flex:1;padding:12px">
+<option value="all">جميع التصنيفات</option>
+</select>
+
+<button class="secondary"
+onclick="window.jgShowFavorites=!window.jgShowFavorites;render()">
+❤️ المفضلة
+</button>
+
+</div>
+</div>
+
+<div id="grid" class="grid">
+<div class="empty">جاري التحميل…</div>
+</div>
 </section>
-
-<footer class="muted" style="text-align:center;padding:35px">
-© <span id="year"></span> جلغيفي بلس — جميع الحقوق محفوظة
-</footer>
-</div>
-
-<div id="modal" class="modal hidden" onclick="if(event.target===this)closeModal()">
-<div>
-<div class="row">
-<h2 id="title">نافذة</h2>
-<button class="secondary" onclick="closeModal()">إغلاق</button>
-</div>
-<div id="body"></div>
-</div>
-</div>
-
-<script>
-const SUPABASE_URL="https://cfdrwjvjjclaqnbvmvuf.supabase.co";
-const KEY="sb_publishable_-8VbAf8C92ialpPZ02UJPQ__hrxOybz";
-const db=window.supabase.createClient(SUPABASE_URL,KEY);
-
-let user=null,profile=null,products=[],cart=[],settings={},appliedCoupon=null,couponQuote=null;
-
-const $=id=>document.getElementById(id);
-
-const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({
-'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-}[c]));
 
 function say(t){
 $('message').textContent=t;
@@ -205,41 +206,114 @@ render();
 }
 
 function render(){
-$('grid').innerHTML=products.length?products.map(p=>`
-<article class="card product">
-<img src="${esc(p.image_url||'https://placehold.co/600x400?text=Digital+Account')}" onerror="this.src='https://placehold.co/600x400?text=Account'">
-<h3>${esc(p.name)}</h3>
-<p class="muted">${esc(p.description||'')}</p>
-<div class="row">
-<b class="price">${cash(p.price)}</b>
-<span class="muted">${p.is_unlimited?'متوفر':'المخزون '+(p.stock||0)}</span>
-</div>
-<div>
-<h4>تقييمات المشترين</h4>
-${(p.reviews||[]).length?p.reviews.map(r=>`
-<div class="card">
-<b>${esc(r.reviewer_name||'مشتري')}</b>
-<span style="color:green">✓ تم الشراء</span>
-<p>${'⭐'.repeat(Number(r.rating)||0)}</p>
-<p>${esc(r.comment||'')}</p>
-</div>`).join(''):'<p class="muted">لا توجد تقييمات بعد.</p>'}
-</div>
-<button style="width:100%;margin-top:12px" onclick="add('${p.id}')">أضف للسلة</button>
-</article>
-`).join(''):'<div class="empty">لا توجد منتجات حاليًا.</div>';
+
+const search = document.getElementById('searchProducts');
+const category = document.getElementById('categoryFilter');
+
+const query = search ? search.value.trim().toLowerCase() : '';
+const selectedCategory = category ? category.value : 'all';
+
+const categories = [...new Set(
+products.map(p => p.category).filter(Boolean)
+)];
+
+if(category){
+const oldValue = category.value;
+
+category.innerHTML =
+'<option value="all">جميع التصنيفات</option>' +
+categories.map(c =>
+`<option value="${esc(c)}">${esc(c)}</option>`
+).join('');
+
+category.value = categories.includes(oldValue) || oldValue === 'all'
+? oldValue : 'all';
 }
 
-function add(id){
-const p=products.find(x=>x.id===id);
-if(!p)return;
-if(!p.is_unlimited&&Number(p.stock)<=0)return say('نفد المخزون');
+if(!window.jgFavorites){
+window.jgFavorites = JSON.parse(localStorage.getItem('jgFavorites') || '[]');
+}
 
-const item=cart.find(x=>x.id===id);
-if(item)item.qty++;
-else cart.push({id,qty:1});
+let filtered = products.filter(p => {
 
-$('count').textContent=cart.reduce((a,x)=>a+x.qty,0);
-say('تمت إضافة المنتج للسلة');
+const matchesSearch =
+(p.name || '').toLowerCase().includes(query) ||
+(p.description || '').toLowerCase().includes(query);
+
+const matchesCategory =
+selectedCategory === 'all' || p.category === selectedCategory;
+
+const matchesFavorite =
+!window.jgShowFavorites ||
+window.jgFavorites.includes(p.id);
+
+return matchesSearch && matchesCategory && matchesFavorite;
+});
+
+$('grid').innerHTML = filtered.length ? filtered.map(p => `
+
+<article class="card product">
+
+<button class="secondary"
+onclick="toggleFavorite('${p.id}')"
+style="float:left">
+${window.jgFavorites.includes(p.id) ? '❤️' : '🤍'}
+</button>
+
+<img src="${esc(p.image_url || 'https://placehold.co/600x400?text=Digital+Account')}"
+onerror="this.src='https://placehold.co/600x400?text=Account'">
+
+<h3>${esc(p.name)}</h3>
+
+<p class="muted">${esc(p.description || '')}</p>
+
+${p.category ? `<span class="muted">${esc(p.category)}</span>` : ''}
+
+<div class="row">
+<b class="price">${cash(p.price)}</b>
+<span class="muted">${p.is_unlimited ? 'متوفر' : 'المخزون ' + (p.stock || 0)}</span>
+</div>
+
+<div>
+<h4>تقييمات المشترين</h4>
+
+${(p.reviews || []).length ? p.reviews.map(r => `
+<div class="card">
+<b>${esc(r.reviewer_name || 'مشتري')}</b>
+<span style="color:green">✓ تم الشراء</span>
+<p>${'⭐'.repeat(Number(r.rating) || 0)}</p>
+<p>${esc(r.comment || '')}</p>
+</div>
+`).join('') : '<p class="muted">لا توجد تقييمات بعد.</p>'}
+
+</div>
+
+<button style="width:100%;margin-top:12px"
+onclick="add('${p.id}')">
+أضف للسلة
+</button>
+
+</article>
+
+`).join('') : '<div class="empty">لا توجد منتجات مطابقة.</div>';
+
+}
+
+function toggleFavorite(id){
+
+if(!window.jgFavorites){
+window.jgFavorites = [];
+}
+
+if(window.jgFavorites.includes(id)){
+window.jgFavorites = window.jgFavorites.filter(x => x !== id);
+}else{
+window.jgFavorites.push(id);
+}
+
+localStorage.setItem('jgFavorites', JSON.stringify(window.jgFavorites));
+
+render();
 }
 
 function cartSubtotal(){
