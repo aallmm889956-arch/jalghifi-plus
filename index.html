@@ -166,7 +166,25 @@ if(adminTab==='settings')return `<div class="notice">تُحفظ الإعدادا
 return '';}
 function ordersTable(list){return `<div class="scroll"><table><tr><th>الطلب</th><th>العميل</th><th>المبلغ</th><th>الحالة</th><th>الإجراءات</th></tr>${list.map(o=>`<tr><td><b>${esc(o.product_name)}</b><div class="small muted">${esc(o.id)}</div></td><td>${esc(o.customer_name)}<div class="small">${esc(o.customer_email||'البريد غير مسجل')}</div><div class="small">${esc(o.customer_phone||'الجوال غير مسجل')}</div></td><td>${cash(o.total)}<div class="small muted">قبل الخصم ${cash(o.subtotal??o.total)}</div></td><td>${esc(paymentLabel(o))}<div class="small muted">${o.account_sent_at?'تم التسليم':'بانتظار التسليم'}${o.account_sent_by_name||o.execution_by_name?` — نفّذه: ${esc(o.account_sent_by_name||o.execution_by_name)}`:''}${o.account_sent_at?` — ${new Date(o.account_sent_at).toLocaleString('ar-SA')}`:''}</div></td><td><div class="actions"><button class="secondary" onclick="orderDetails('${o.id}')">تفاصيل</button>${o.receipt_path?`<button class="secondary" onclick="showReceipt('${o.id}')">الإيصال</button>`:''}${o.payment_status==='under_review'?`<button class="success" onclick="approve('${o.id}')">قبول</button><button class="danger" onclick="reject('${o.id}')">رفض</button>`:''}${o.payment_status==='paid'&&!o.account_sent_at?`<button onclick="markAccountSent('${o.id}')">تم الإرسال بالبريد</button>`:''}${o.account_sent_at?'<span class="pill">تم التسليم</span>':''}</div></td></tr>`).join('')||'<tr><td colspan="5">لا توجد طلبات.</td></tr>'}</table></div>`;}
 function filterAdminOrders(){const q=($('orderSearch').value||'').toLowerCase();$('ordersTable').innerHTML=ordersTable(adminCache.orders.filter(o=>[o.id,o.product_name,o.customer_name,o.customer_email,o.customer_phone].some(v=>String(v||'').toLowerCase().includes(q))));}
-async function deleteReview(id){if(!isAdmin())return say('المدير فقط يستطيع حذف التقييمات','bad');if(!confirm('متأكد من حذف هذا التقييم نهائيًا؟'))return;const r=await db.from('reviews').delete().eq('id',id);if(r.error)return say('تعذر حذف التقييم: '+r.error.message,'bad');say('تم حذف التقييم','ok');await staffView();adminTab='reviews';renderAdmin();await getProducts();}
+async function deleteReview(id) {
+  if (!isAdmin()) return say('المدير فقط يستطيع حذف التقييمات', 'bad');
+  if (!confirm('هل أنت متأكد من حذف التقييم نهائيًا؟')) return;
+
+  const r = await db.from('reviews')
+    .delete()
+    .eq('id', id)
+    .select('id');
+
+  if (r.error) return say('فشل الحذف: ' + r.error.message, 'bad');
+  if (!r.data || r.data.length === 0)
+    return say('لم يُحذف التقييم. تحقق من صلاحيات الحذف في Supabase.', 'bad');
+
+  say('تم حذف التقييم نهائيًا', 'ok');
+  await getProducts();
+  await staffView();
+  adminTab = 'reviews';
+  renderAdmin();
+}
 async function toggleReviewVisibility(id,visible){if(!isAdmin())return say('المدير فقط يستطيع إدارة التقييمات','bad');const r=await db.from('reviews').update({is_visible:visible}).eq('id',id);if(r.error)return say('تعذر تغيير ظهور التقييم. تأكد أن جدول reviews يحتوي عمود is_visible: '+r.error.message,'bad');say(visible?'تم إظهار التقييم':'تم إخفاء التقييم','ok');await staffView();adminTab='reviews';renderAdmin();await getProducts();}
 async function saveSettings(){if(!isAdmin())return say('هذه الخاصية للمدير فقط','bad');if(!settings.id)return say('لا يوجد سجل إعدادات في جدول store_settings. أضف سجلًا واحدًا ثم حدّث الصفحة.','bad');const payload={store_name:$('settingStoreName').value.trim(),whatsapp_number:$('settingWhatsapp').value.trim(),bank_name:$('settingBank').value.trim(),account_name:$('settingAccountName').value.trim(),account_number:$('settingAccountNumber').value.trim(),iban:$('settingIban').value.trim(),welcome_coupon:$('settingWelcomeCoupon').value.trim(),updated_at:new Date().toISOString()};const r=await db.from('store_settings').update(payload).eq('id',settings.id).select().maybeSingle();if(r.error)return say('تعذر حفظ الإعدادات: '+r.error.message,'bad');if(!r.data)return say('لم يتم تحديث السجل. تحقق من صلاحيات RLS لجدول store_settings.','bad');settings=r.data;refreshWhatsapp();say('تم حفظ إعدادات المتجر','ok');renderAdmin();}
 async function toggleProduct(id,active){if(!isStaff())return say('ليس لديك صلاحية','bad');const r=await db.from('products').update({is_active:active,updated_at:new Date().toISOString()}).eq('id',id);if(r.error)return say(r.error.message,'bad');say(active?'تم إظهار المنتج':'تم إخفاء المنتج','ok');await staffView();await getProducts();}
