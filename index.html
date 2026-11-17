@@ -6,152 +6,101 @@
 <meta name="theme-color" content="#09090f">
 <title>جلغيفي بلس | متجر المنتجات الرقمية</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <style>
 :root{
---bg:#08080e;--panel:#12121d;--panel2:#191827;
---line:#302d43;--purple:#a855f7;--purple2:#7c3aed;
+--bg:#08080e;--panel:#12121d;--line:#302d43;
+--purple:#a855f7;--purple2:#7c3aed;
 --text:#f7f4ff;--muted:#aaa5bd;
---green:#22a06b;--red:#d94b68;--gold:#e7bd69
+--green:#176b4c;--red:#8f2943
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
 body{
-margin:0;background:radial-gradient(ellipse at 50% -20%,#241438 0,transparent 48%),var(--bg);
+margin:0;background:radial-gradient(ellipse at 50% -20%,#241438,transparent 48%),var(--bg);
 color:var(--text);font-family:Tahoma,Arial,sans-serif;line-height:1.7
 }
 button,input,textarea,select{font:inherit}
 button{
-border:0;border-radius:12px;
-background:linear-gradient(135deg,var(--purple),var(--purple2));
-color:#fff;padding:10px 15px;cursor:pointer;font-weight:700
+border:0;border-radius:10px;background:linear-gradient(135deg,var(--purple),var(--purple2));
+color:white;padding:10px 14px;cursor:pointer;font-weight:bold
 }
-button:hover{filter:brightness(1.12)}
-button:disabled{opacity:.55;cursor:not-allowed}
+button:disabled{opacity:.5;cursor:not-allowed}
 .secondary{background:#29263a;border:1px solid #403b58}
 .success{background:#176b4c}
 .danger{background:#8f2943}
-.gold{background:#75551b}
-.wrap{width:min(1180px,calc(100% - 30px));margin:auto}
+.hidden{display:none!important}
+.wrap{width:min(1180px,calc(100% - 24px));margin:auto}
 .top{
-position:sticky;top:0;z-index:5;background:#09090feF;
-backdrop-filter:blur(16px);border-bottom:1px solid #30283d;padding:13px 0
+position:sticky;top:0;z-index:5;background:#09090fee;
+backdrop-filter:blur(15px);border-bottom:1px solid #30283d;padding:12px 0
 }
 .topinner,.row{
 display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap
 }
-.brand{font-size:25px;font-weight:900;white-space:nowrap}
+.brand{font-size:25px;font-weight:900}
 .brand b{color:#c084fc}
-.brand-area{display:flex;align-items:center;gap:14px;min-width:0}
-.staff-identity{
-display:flex;align-items:center;gap:10px;padding:7px 13px;
-border:1px solid #68439a;border-radius:14px;
-background:linear-gradient(135deg,#241535,#151321);
-max-width:230px
-}
-.staff-avatar{
-width:36px;height:36px;flex:0 0 36px;display:grid;place-items:center;
-border-radius:11px;background:linear-gradient(135deg,#a855f7,#6d28d9);
-color:white;font-weight:900;font-size:17px
-}
-.staff-meta{min-width:0;display:flex;flex-direction:column;line-height:1.35}
-.staff-name{font-size:13px;font-weight:800;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:155px}
-.staff-rank{font-size:11px;color:#d8b4fe;margin-top:3px}
-.staff-identity.admin .staff-avatar{background:linear-gradient(135deg,#e7bd69,#9a6b20)}
-.staff-identity.admin{border-color:#8a6a32}
-.nav{display:flex;gap:8px;flex-wrap:wrap}
+.nav,.actions,.tabs{display:flex;gap:7px;flex-wrap:wrap}
 .hero{
-margin:24px 0;padding:clamp(25px,6vw,60px);
-border:1px solid #49305f;border-radius:25px;
-background:linear-gradient(115deg,#28143c,#171525 58%,#10101a);
-box-shadow:0 20px 60px #0005;position:relative;overflow:hidden
+margin:24px 0;padding:clamp(25px,6vw,55px);
+border:1px solid #49305f;border-radius:22px;
+background:linear-gradient(115deg,#28143c,#171525 58%,#10101a)
 }
-.hero h1{font-size:clamp(27px,5vw,43px);line-height:1.35;margin:0 0 10px}
-.hero p{color:#d2c9df;max-width:600px}
+.hero h1{font-size:clamp(27px,5vw,43px);line-height:1.4}
 .muted{color:var(--muted)}
-.sectionhead{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:28px 0 14px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,245px),1fr));gap:16px}
+.small{font-size:12px}
+.sectionhead{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:25px 0 14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr));gap:15px}
 .card,.box{
 background:linear-gradient(145deg,#171624,#11111a);
-border:1px solid var(--line);border-radius:18px;padding:17px;
-box-shadow:0 8px 28px #0002
+border:1px solid var(--line);border-radius:16px;padding:16px
 }
-.product{display:flex;flex-direction:column;min-width:0}
-.product img{width:100%;height:175px;object-fit:cover;border-radius:13px;background:#0b0b12}
-.product h3{margin:12px 0 4px}
-.product .desc{color:var(--muted);min-height:48px;white-space:pre-wrap}
-.product .bottom{margin-top:auto}
+.product{display:flex;flex-direction:column}
+.product img{width:100%;height:170px;object-fit:cover;border-radius:12px}
+.product .desc{color:var(--muted);min-height:45px;white-space:pre-wrap}
 .price{font-size:20px;font-weight:900;color:#dfc1ff}
 .pill{display:inline-block;border:1px solid #51436a;background:#241b32;color:#e8d5ff;padding:3px 9px;border-radius:99px;font-size:12px}
 .field{margin:12px 0}
-.field label{display:block;margin-bottom:6px;font-size:14px;color:#e4dff0}
+.field label{display:block;margin-bottom:5px;font-size:14px}
 .field input,.field textarea,.field select,.searchbox{
-width:100%;padding:11px 12px;border:1px solid #403b55;
-background:#0b0b13;color:#fff;border-radius:11px;outline:none
+width:100%;padding:11px;border:1px solid #403b55;
+background:#0b0b13;color:white;border-radius:10px
 }
-.field textarea{min-height:85px;resize:vertical}
-.field input[type=checkbox]{width:auto;accent-color:var(--purple)}
+.field textarea{min-height:85px}
+.field input[type=checkbox]{width:auto}
 .modal{
 position:fixed;inset:0;background:#000c;display:grid;
-place-items:center;padding:14px;z-index:20
+place-items:center;padding:12px;z-index:20
 }
 .modal>div{
-background:#151421;border:1px solid #48405d;padding:20px;
-border-radius:19px;width:min(850px,100%);max-height:92vh;
-overflow:auto;box-shadow:0 20px 80px #0009
+background:#151421;border:1px solid #48405d;padding:18px;
+border-radius:17px;width:min(1000px,100%);max-height:93vh;overflow:auto
 }
-.hidden{display:none!important}
-.notice{padding:12px 14px;background:#29213a;border:1px solid #49345e;border-radius:12px;margin:12px 0}
+.notice{padding:12px;background:#29213a;border:1px solid #49345e;border-radius:11px;margin:12px 0}
 .notice.ok{background:#102b22;border-color:#205c45}
 .notice.bad{background:#351722;border-color:#733047}
-.empty{text-align:center;padding:35px 12px;color:var(--muted);grid-column:1/-1}
-table{width:100%;border-collapse:collapse;min-width:760px}
-td,th{text-align:right;padding:11px;border-bottom:1px solid var(--line);vertical-align:top}
-th{color:#d7c4ef;background:#1b1928;position:sticky;top:0}
-.scroll{overflow:auto;border:1px solid var(--line);border-radius:12px}
-.small{font-size:12px;line-height:1.8}
-.actions{display:flex;gap:6px;flex-wrap:wrap}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:11px;margin:15px 0}
-.stat{background:linear-gradient(145deg,#241832,#151421);border:1px solid #46345b;border-radius:15px;padding:15px}
-.stat strong{font-size:23px;display:block;color:#e2c4ff}
-.stat span{font-size:13px;color:var(--muted)}
-.tabs{display:flex;gap:7px;flex-wrap:wrap;margin:15px 0}
+.empty{text-align:center;padding:30px;color:var(--muted);grid-column:1/-1}
+table{width:100%;border-collapse:collapse;min-width:700px}
+td,th{text-align:right;padding:10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:#d7c4ef;background:#1b1928}
+.scroll{overflow:auto;border:1px solid var(--line);border-radius:11px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:15px 0}
+.stat{background:#241832;border:1px solid #46345b;border-radius:13px;padding:13px}
+.stat strong{font-size:21px;display:block;color:#e2c4ff}
+.stat span{font-size:12px;color:var(--muted)}
+.tabs{margin:15px 0}
 .tabs button.active{outline:2px solid #d8b4fe;background:#5b21b6}
-.adminsection{margin-top:20px}
-.inline{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.footer{padding:38px 0;text-align:center;color:var(--muted)}
-.summary{background:#0d0d16;border:1px solid var(--line);padding:13px;border-radius:13px;margin:12px 0}
+.summary{background:#0d0d16;border:1px solid var(--line);padding:12px;border-radius:12px;margin:10px 0}
+.footer{padding:35px;text-align:center;color:var(--muted)}
 @media(max-width:650px){
-.wrap{width:min(100% - 20px,1180px)}
-.topinner{align-items:flex-start}
-.brand-area{width:100%;justify-content:space-between;gap:8px}
-.staff-identity{padding:6px 9px;gap:7px;max-width:190px}
-.staff-avatar{width:32px;height:32px;flex-basis:32px}
-.staff-name{max-width:125px;font-size:12px}
-.staff-rank{font-size:10px}
-.nav{width:100%}
-.nav button{flex:1;padding:9px 8px;font-size:12px}
-.hero{border-radius:18px}
-.product img{height:155px}
-.modal>div{padding:15px}
+.nav{width:100%}.nav button{flex:1;font-size:12px;padding:9px 5px}
+.hero{border-radius:16px}.modal>div{padding:13px}
 }
 </style>
 </head>
-
 <body>
+
 <header class="top">
 <div class="wrap topinner">
-<div class="brand-area">
 <div class="brand">جلغيفي <b>بلس</b></div>
-<div id="staffIdentity" class="staff-identity hidden">
-<div class="staff-avatar" id="staffAvatar">م</div>
-<div class="staff-meta">
-<span class="staff-name" id="staffName"></span>
-<span class="staff-rank" id="staffRank"></span>
-</div>
-</div>
-</div>
-
 <nav class="nav">
 <button class="secondary" onclick="scrollProducts()">المنتجات</button>
 <button class="secondary" onclick="cartView()">السلة (<span id="count">0</span>)</button>
@@ -167,36 +116,28 @@ th{color:#d7c4ef;background:#1b1928;position:sticky;top:0}
 <section class="hero">
 <span class="pill">متجر المنتجات الرقمية</span>
 <h1>اختياراتك الرقمية،<br>بتجربة تسوّق أفخم.</h1>
-<p>تصفح المنتجات، أضف للسلة، وتابع طلبك من حسابك. يتم إرسال المنتج إليك يدويًا عبر البريد الإلكتروني بعد اعتماد الدفع.</p>
-<div class="actions">
+<p class="muted">تصفح المنتجات وأضفها للسلة وتابع طلبك من حسابك.</p>
 <button onclick="scrollProducts()">اكتشف المنتجات</button>
-<a id="heroWhatsapp" class="hidden" target="_blank" rel="noopener noreferrer" href="#">تواصل معنا عبر واتساب</a>
-</div>
 </section>
 
-<div id="message" class="notice hidden" role="status"></div>
+<div id="message" class="notice hidden"></div>
 
 <section id="products">
 <div class="sectionhead">
-<div>
-<h2 style="margin:0">منتجاتنا</h2>
-<div class="muted small">اختر المنتج المناسب لك</div>
-</div>
-<div class="inline" style="min-width:min(100%,420px)">
+<div><h2 style="margin:0">منتجاتنا</h2><span class="muted small">اختر المنتج المناسب لك</span></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
 <input class="searchbox" id="search" placeholder="ابحث عن منتج..." oninput="render()">
-<select class="searchbox" id="categoryFilter" onchange="render()" style="max-width:170px">
+<select class="searchbox" id="categoryFilter" onchange="render()">
 <option value="">كل التصنيفات</option>
 </select>
 </div>
 </div>
-<div id="grid" class="grid">
-<div class="empty">جاري تحميل المنتجات…</div>
-</div>
+<div id="grid" class="grid"><div class="empty">جاري تحميل المنتجات…</div></div>
 </section>
 </main>
 
 <footer class="footer">
-©️ <span id="year"></span> جلغيفي بلس — جميع الحقوق محفوظة
+© <span id="year"></span> جلغيفي بلس — جميع الحقوق محفوظة
 </footer>
 
 <div id="modal" class="modal hidden" onclick="if(event.target===this)closeModal()">
@@ -208,888 +149,446 @@ th{color:#d7c4ef;background:#1b1928;position:sticky;top:0}
 <div id="body"></div>
 </div>
 </div>
+
 <script>
-/* إعداد Supabase */
-const SUPABASE_URL = "https://cfdrwjvjjclaqnbvmvuf.supabase.co";
-const KEY = "sb_publishable_-8VbAf8C92ialpPZ02UJPQ__hrxOybz";
-const db = window.supabase.createClient(SUPABASE_URL, KEY);
+const SUPABASE_URL="https://cfdrwjvjjclaqnbvmvuf.supabase.co";
+const KEY="sb_publishable_-8VbAf8C92ialpPZ02UJPQ__hrxOybz";
+const db=window.supabase.createClient(SUPABASE_URL,KEY);
 
-let user = null;
-let profile = null;
-let products = [];
-let cart = [];
-let settings = {};
-let appliedCoupon = null;
-let couponQuote = null;
+let user=null,profile=null,products=[],cart=[];
+let adminCache={orders:[],products:[],coupons:[],profiles:[]};
+let adminTab="overview";
 
-let adminCache = {
-  orders: [],
-  products: [],
-  coupons: [],
-  profiles: []
+const $=id=>document.getElementById(id);
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({
+"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+}[c]));
+
+function money(v){return Number(v||0).toFixed(2)+" ريال"}
+function isAdmin(){return profile?.role==="admin"}
+
+function permissions(){
+const p=profile?.permissions;
+if(Array.isArray(p))return p;
+return [];
+}
+function can(p){
+return isAdmin()||(profile?.role==="employee"&&profile?.is_active===true&&permissions().includes(p));
+}
+function isStaff(){
+return isAdmin()||(profile?.role==="employee"&&profile?.is_active===true);
+}
+function message(text,type=""){
+$("message").textContent=text;
+$("message").className="notice "+type;
+$("message").classList.remove("hidden");
+window.scrollTo({top:0,behavior:"smooth"});
+}
+function showModal(title,html){
+$("title").textContent=title;
+$("body").innerHTML=html;
+$("modal").classList.remove("hidden");
+}
+function closeModal(){
+$("modal").classList.add("hidden");
+$("body").innerHTML="";
+}
+function updateNavigation(){
+$("loginBtn").classList.toggle("hidden",!!user);
+$("logoutBtn").classList.toggle("hidden",!user);
+$("ordersBtn").classList.toggle("hidden",!user);
+$("staffBtn").classList.toggle("hidden",!isStaff());
+}
+
+async function getProfile(){
+profile=null;
+if(!user)return;
+const {data,error}=await db.from("profiles").select("*").eq("id",user.id).maybeSingle();
+if(error){console.error(error);return}
+profile=data;
+}
+async function refreshSession(){
+const {data}=await db.auth.getSession();
+user=data.session?.user||null;
+await getProfile();
+updateNavigation();
+}
+
+async function loadProducts(){
+const {data,error}=await db.from("products").select("*")
+.eq("is_active",true).order("created_at",{ascending:false});
+if(error){
+$("grid").innerHTML='<div class="empty">تعذر تحميل المنتجات.</div>';
+console.error(error);return;
+}
+products=data||[];
+renderCategories();render();
+}
+function renderCategories(){
+const select=$("categoryFilter"),old=select.value;
+const cats=[...new Set(products.map(p=>p.category).filter(Boolean))];
+select.innerHTML='<option value="">كل التصنيفات</option>'+
+cats.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("");
+select.value=old;
+}
+function render(){
+const search=($("search").value||"").toLowerCase().trim();
+const cat=$("categoryFilter").value;
+const list=products.filter(p=>
+(!cat||p.category===cat)&&
+(String(p.name||"").toLowerCase().includes(search)||
+String(p.description||"").toLowerCase().includes(search))
+);
+$("grid").innerHTML=list.length?list.map(p=>`
+<article class="card product">
+${p.image_url?`<img src="${esc(p.image_url)}" alt="${esc(p.name)}">`:'<div class="empty">منتج رقمي</div>'}
+<h3>${esc(p.name)}</h3>
+<div class="desc">${esc(p.description||"")}</div>
+<div style="margin-top:auto">
+<div class="price">${money(p.price)}</div>
+<button style="width:100%;margin-top:9px" onclick="addToCart('${esc(p.id)}')">أضف للسلة</button>
+</div>
+</article>`).join(""):'<div class="empty">لا توجد منتجات حاليًا.</div>';
+}
+function scrollProducts(){$("products").scrollIntoView({behavior:"smooth"})}
+
+function addToCart(id){
+const p=products.find(x=>String(x.id)===String(id));
+if(!p)return;
+if(!p.is_unlimited&&Number(p.stock||0)<1)return message("المنتج نفد من المخزون.","bad");
+cart.push(p);$("count").textContent=cart.length;
+message("تمت إضافة المنتج إلى السلة.","ok");
+}
+function cartView(){
+if(!cart.length)return showModal("السلة",'<div class="empty">السلة فارغة.</div>');
+const total=cart.reduce((s,p)=>s+Number(p.price||0),0);
+showModal("سلة المشتريات",cart.map((p,i)=>`
+<div class="summary row"><div>${esc(p.name)}<br>${money(p.price)}</div>
+<button class="danger" onclick="removeCart(${i})">حذف</button></div>`).join("")+
+`<h3>الإجمالي: ${money(total)}</h3><button onclick="checkout()">إكمال الطلب</button>`);
+}
+function removeCart(i){cart.splice(i,1);$("count").textContent=cart.length;cartView()}
+
+async function checkout(){
+if(!user){closeModal();authView();return message("سجل الدخول أولًا.");}
+if(!cart.length)return;
+if(cart.length>1)return message("أكمل طلب كل منتج بشكل منفصل حاليًا.");
+const p=cart[0];closeModal();
+showModal("إتمام الطلب",`
+<div class="summary">المنتج: ${esc(p.name)}<br>السعر: ${money(p.price)}</div>
+<div class="field"><label>اسم العميل</label><input id="customerName" value="${esc(profile?.full_name||"")}"></div>
+<div class="field"><label>رقم الجوال</label><input id="customerPhone" placeholder="05xxxxxxxx"></div>
+<div class="field"><label>كود الخصم</label><input id="couponCode"></div>
+<button onclick="createOrder('${esc(p.id)}')">تأكيد الطلب</button>`);
+}
+async function createOrder(productId){
+const name=$("customerName").value.trim();
+const phone=$("customerPhone").value.trim();
+const coupon=$("couponCode").value.trim()||null;
+if(!name)return alert("اكتب اسم العميل.");
+const {error}=await db.rpc("create_store_order_with_coupon",{
+p_product_id:productId,p_customer_name:name,
+p_customer_phone:phone||null,p_coupon_code:coupon
+});
+if(error)return alert(error.message);
+cart=cart.filter(p=>String(p.id)!==String(productId));
+$("count").textContent=cart.length;closeModal();
+message("تم إنشاء طلبك بنجاح. تابع حالة الطلب من حسابك.","ok");
+}
+
+function authView(){
+showModal("تسجيل الدخول",`
+<div class="field"><label>البريد الإلكتروني</label><input id="authEmail" type="email"></div>
+<div class="field"><label>كلمة المرور</label><input id="authPassword" type="password"></div>
+<button onclick="login()">دخول</button>
+<button class="secondary" onclick="registerView()">إنشاء حساب جديد</button>`);
+}
+async function login(){
+const email=$("authEmail").value.trim(),password=$("authPassword").value;
+const {error}=await db.auth.signInWithPassword({email,password});
+if(error)return alert(error.message);
+closeModal();await refreshSession();message("تم تسجيل الدخول.","ok");
+}
+function registerView(){
+showModal("إنشاء حساب",`
+<div class="field"><label>الاسم الكامل</label><input id="regName"></div>
+<div class="field"><label>البريد الإلكتروني</label><input id="regEmail" type="email"></div>
+<div class="field"><label>كلمة المرور</label><input id="regPassword" type="password"></div>
+<button onclick="register()">إنشاء الحساب</button>`);
+}
+async function register(){
+const full_name=$("regName").value.trim(),email=$("regEmail").value.trim(),password=$("regPassword").value;
+if(!full_name||!email||password.length<6)return alert("أكمل البيانات وكلمة المرور 6 أحرف على الأقل.");
+const {data,error}=await db.auth.signUp({email,password,options:{data:{full_name}}});
+if(error)return alert(error.message);
+closeModal();message("تم إنشاء الحساب. إذا طُلب تأكيد البريد افتح رسالة التأكيد.","ok");
+if(data.session)await refreshSession();
+}
+async function logout(){
+const {error}=await db.auth.signOut();
+if(error)return alert(error.message);
+user=null;profile=null;updateNavigation();message("تم تسجيل الخروج.");
+}
+async function ordersView(){
+if(!user)return authView();
+const {data,error}=await db.from("orders").select("*").eq("user_id",user.id).order("created_at",{ascending:false});
+if(error)return message("تعذر تحميل الطلبات: "+error.message,"bad");
+showModal("طلباتي",data?.length?`<div class="scroll"><table>
+<thead><tr><th>المنتج</th><th>المبلغ</th><th>حالة الدفع</th><th>التاريخ</th></tr></thead>
+<tbody>${data.map(o=>`<tr><td>${esc(o.product_name)}</td><td>${money(o.total)}</td>
+<td>${esc(o.payment_status||o.status)}</td><td>${new Date(o.created_at).toLocaleString("ar-SA")}</td></tr>`).join("")}</tbody>
+</table></div>`:'<div class="empty">لا توجد طلبات.</div>');
+}
+
+/* لوحة الإدارة */
+function staffView(){
+if(!isStaff())return message("ليس لديك صلاحية دخول لوحة الإدارة.","bad");
+adminTab="overview";loadStaffData();
+}
+async function loadStaffData(){
+if(!isStaff())return;
+const requests=[
+db.from("orders").select("*").order("created_at",{ascending:false}),
+db.from("products").select("*").order("created_at",{ascending:false}),
+db.from("coupons").select("*").order("created_at",{ascending:false})
+];
+const results=await Promise.all(requests);
+const failed=results.find(r=>r.error);
+if(failed)return message("تعذر تحميل بيانات الإدارة: "+failed.error.message,"bad");
+adminCache.orders=results[0].data||[];
+adminCache.products=results[1].data||[];
+adminCache.coupons=results[2].data||[];
+if(isAdmin()){
+const p=await db.from("profiles").select("id,full_name,email,role,permissions,is_active,created_at");
+if(p.error)console.error(p.error);
+adminCache.profiles=p.data||[];
+}
+renderAdmin();
+}
+function renderAdmin(){
+const tabs=[["overview","الرئيسية"]];
+if(can("orders"))tabs.push(["orders","الطلبات"]);
+if(can("products"))tabs.push(["products","المنتجات"]);
+if(can("coupons"))tabs.push(["coupons","الكوبونات"]);
+if(can("profits"))tabs.push(["profits","المبيعات"]);
+if(isAdmin())tabs.push(["employees","الموظفون"]);
+if(isAdmin())tabs.push(["customers","العملاء"]);
+showModal("لوحة إدارة جلغيفي بلس",`
+<div class="notice">مرحبًا ${esc(profile?.full_name||"")} — ${isAdmin()?"مدير المتجر":"موظف"}</div>
+<div class="tabs">${tabs.map(([id,label])=>`
+<button class="${adminTab===id?"active":"secondary"}" onclick="adminTab='${id}';renderAdmin()">${label}</button>`).join("")}</div>
+<div>${adminContent()}</div>`);
+}
+function adminContent(){
+const orders=adminCache.orders,paid=orders.filter(o=>o.payment_status==="paid");
+if(adminTab==="overview")return `
+<div class="stats">
+<div class="stat"><strong>${orders.length}</strong><span>كل الطلبات</span></div>
+<div class="stat"><strong>${paid.length}</strong><span>الطلبات المدفوعة</span></div>
+<div class="stat"><strong>${adminCache.products.length}</strong><span>المنتجات</span></div>
+<div class="stat"><strong>${money(paid.reduce((s,o)=>s+Number(o.total||0),0))}</strong><span>إجمالي المبيعات</span></div>
+</div><button class="secondary" onclick="loadStaffData()">تحديث البيانات</button>`;
+if(adminTab==="orders")return ordersContent();
+if(adminTab==="products")return productsContent();
+if(adminTab==="coupons")return couponsContent();
+if(adminTab==="profits")return profitsContent();
+if(adminTab==="employees")return employeesContent();
+if(adminTab==="customers")return customersContent();
+return "";
+}
+function ordersContent(){
+const list=adminCache.orders;
+return list.length?`<div class="scroll"><table><thead><tr>
+<th>العميل</th><th>المنتج</th><th>المبلغ</th><th>الدفع</th><th>التاريخ</th><th>الإجراءات</th>
+</tr></thead><tbody>${list.map(o=>`<tr>
+<td>${esc(o.customer_name)}<br><small>${esc(o.customer_email)}</small></td>
+<td>${esc(o.product_name)}</td><td>${money(o.total)}</td><td>${esc(o.payment_status)}</td>
+<td>${new Date(o.created_at).toLocaleString("ar-SA")}</td><td><div class="actions">
+${o.payment_status==="under_review"?`<button class="success" onclick="approveOrder('${o.id}')">قبول الدفع</button><button class="danger" onclick="rejectOrder('${o.id}')">رفض</button>`:""}
+${o.payment_status==="paid"&&!o.account_sent_at?`<button onclick="markAccountSent('${o.id}')">تأكيد التنفيذ</button>`:""}
+<button class="secondary" onclick="showOrderDetails('${o.id}')">التفاصيل</button>
+</div></td></tr>`).join("")}</tbody></table></div>`:'<div class="empty">لا توجد طلبات.</div>';
+}
+function productsContent(){
+const list=adminCache.products;
+return `<div class="row"><h3>إدارة المنتجات</h3><button onclick="productForm()">إضافة منتج</button></div>
+<div class="scroll"><table><thead><tr><th>المنتج</th><th>السعر</th><th>المخزون</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody>
+${list.map(p=>`<tr><td>${esc(p.name)}</td><td>${money(p.price)}</td><td>${p.is_unlimited?"غير محدود":esc(p.stock)}</td><td>${p.is_active?"مفعل":"متوقف"}</td>
+<td><div class="actions"><button onclick="productForm('${p.id}')">تعديل</button><button class="danger" onclick="deleteProduct('${p.id}')">حذف</button></div></td></tr>`).join("")}
+</tbody></table></div>`;
+}
+function productForm(id=""){
+const p=adminCache.products.find(x=>String(x.id)===String(id))||{};
+showModal(id?"تعديل المنتج":"إضافة منتج",`
+<div class="field"><label>اسم المنتج</label><input id="pName" value="${esc(p.name||"")}"></div>
+<div class="field"><label>الوصف</label><textarea id="pDesc">${esc(p.description||"")}</textarea></div>
+<div class="field"><label>السعر بالريال</label><input id="pPrice" type="number" min="0" step=".01" value="${esc(p.price??"")}"></div>
+<div class="field"><label>التصنيف</label><input id="pCategory" value="${esc(p.category||"")}"></div>
+<div class="field"><label>رابط صورة المنتج</label><input id="pImage" value="${esc(p.image_url||"")}"></div>
+<div class="field"><label>المخزون</label><input id="pStock" type="number" min="0" value="${esc(p.stock??0)}"></div>
+<div class="field"><label><input id="pUnlimited" type="checkbox" ${p.is_unlimited?"checked":""}> مخزون غير محدود</label></div>
+<div class="field"><label><input id="pActive" type="checkbox" ${p.is_active!==false?"checked":""}> المنتج مفعل</label></div>
+<button onclick="saveProduct('${id}')">حفظ المنتج</button>`);
+}
+async function saveProduct(id){
+const name=$("pName").value.trim(),price=Number($("pPrice").value);
+if(!name||!Number.isFinite(price)||price<0)return alert("أدخل اسمًا وسعرًا صحيحًا.");
+const payload={
+name,description:$("pDesc").value.trim(),price,
+category:$("pCategory").value.trim()||null,
+image_url:$("pImage").value.trim()||null,
+stock:Math.max(0,Number($("pStock").value||0)),
+is_unlimited:$("pUnlimited").checked,is_active:$("pActive").checked
 };
-
-let adminTab = "overview";
-
-const $ = id => document.getElementById(id);
-const esc = value => String(value ?? "").replace(/[&<>"']/g, char => ({
-  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-}[char]));
-
-function message(text, type = "") {
-  const box = $("message");
-  box.textContent = text;
-  box.className = "notice " + type;
-  box.classList.remove("hidden");
-  window.scrollTo({top:0,behavior:"smooth"});
+const result=id?await db.from("products").update(payload).eq("id",id):await db.from("products").insert(payload);
+if(result.error)return alert(result.error.message);
+alert("تم حفظ المنتج.");await loadStaffData();await loadProducts();
+}
+async function deleteProduct(id){
+if(!confirm("هل تريد حذف المنتج؟"))return;
+const {error}=await db.from("products").delete().eq("id",id);
+if(error)return alert(error.message);
+await loadStaffData();await loadProducts();
+}
+function couponsContent(){
+return `<div class="row"><h3>الكوبونات</h3><button onclick="couponForm()">إضافة كوبون</button></div>
+<div class="scroll"><table><thead><tr><th>الكود</th><th>الخصم</th><th>الاستخدام</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody>
+${adminCache.coupons.map(c=>`<tr><td>${esc(c.code)}</td>
+<td>${esc(c.discount_value)} ${c.discount_type==="percent"?"%":"ريال"}</td>
+<td>${esc(c.usage_count||0)}</td><td>${c.is_active?"مفعل":"متوقف"}</td>
+<td><div class="actions"><button onclick="couponForm('${c.id}')">تعديل</button><button class="secondary" onclick="toggleCoupon('${c.id}',${!c.is_active})">${c.is_active?"إيقاف":"تفعيل"}</button><button class="danger" onclick="deleteCoupon('${c.id}')">حذف</button></div></td></tr>`).join("")}
+</tbody></table></div>`;
+}
+function couponForm(id=""){
+const c=adminCache.coupons.find(x=>String(x.id)===String(id))||{};
+showModal(id?"تعديل كوبون":"إضافة كوبون",`
+<div class="field"><label>كود الخصم</label><input id="cCode" value="${esc(c.code||"")}"></div>
+<div class="field"><label>نوع الخصم</label><select id="cType"><option value="percent" ${c.discount_type==="percent"?"selected":""}>نسبة مئوية</option><option value="fixed" ${c.discount_type==="fixed"?"selected":""}>مبلغ ثابت</option></select></div>
+<div class="field"><label>قيمة الخصم</label><input id="cValue" type="number" min="0" step=".01" value="${esc(c.discount_value??"")}"></div>
+<div class="field"><label><input type="checkbox" id="cActive" ${c.is_active!==false?"checked":""}> الكوبون مفعل</label></div>
+<button onclick="saveCoupon('${id}')">حفظ الكوبون</button>`);
+}
+async function saveCoupon(id){
+const code=$("cCode").value.trim().toUpperCase(),value=Number($("cValue").value),type=$("cType").value;
+if(!code||!Number.isFinite(value)||value<=0)return alert("أدخل كودًا وقيمة صحيحة.");
+if(type==="percent"&&value>100)return alert("النسبة لا يمكن أن تتجاوز 100.");
+const payload={code,discount_type:type,discount_value:value,is_active:$("cActive").checked};
+const result=id?await db.from("coupons").update(payload).eq("id",id):await db.from("coupons").insert(payload);
+if(result.error)return alert(result.error.message);
+alert("تم حفظ الكوبون.");await loadStaffData();
+}
+async function toggleCoupon(id,active){
+const {error}=await db.from("coupons").update({is_active:active}).eq("id",id);
+if(error)return alert(error.message);
+await loadStaffData();
+}
+async function deleteCoupon(id){
+if(!confirm("حذف الكوبون؟"))return;
+const {error}=await db.from("coupons").delete().eq("id",id);
+if(error)return alert(error.message);
+await loadStaffData();
+}
+function profitsContent(){
+const paid=adminCache.orders.filter(o=>o.payment_status==="paid");
+const total=paid.reduce((s,o)=>s+Number(o.total||0),0);
+return `<h3>المبيعات</h3><div class="stats">
+<div class="stat"><strong>${money(total)}</strong><span>إجمالي المبيعات المدفوعة</span></div>
+<div class="stat"><strong>${paid.length}</strong><span>الطلبات المدفوعة</span></div></div>
+<div class="scroll"><table><thead><tr><th>العميل</th><th>المنتج</th><th>المبلغ</th><th>التاريخ</th><th>منفذ الطلب</th></tr></thead><tbody>
+${paid.map(o=>`<tr><td>${esc(o.customer_name)}</td><td>${esc(o.product_name)}</td><td>${money(o.total)}</td><td>${new Date(o.created_at).toLocaleString("ar-SA",{timeZone:"Asia/Riyadh"})}</td><td>${esc(o.account_sent_by_name||"لم ينفذ")}</td></tr>`).join("")}
+</tbody></table></div>
+<p class="muted small">هذه مبيعات الطلبات المدفوعة، وليست أرباحًا صافية بعد خصم التكاليف.</p>`;
+}
+function employeesContent(){
+const list=adminCache.profiles.filter(p=>p.role==="employee");
+return `<h3>إدارة الموظفين</h3>
+<p class="muted small">أدخل معرّف حساب العميل الموجود في profiles لتحويله إلى موظف.</p>
+<div class="field"><label>معرّف الحساب UUID</label><input id="newEmployeeId" placeholder="UUID"></div>
+<div class="field"><label>الصلاحيات</label>
+${["products","orders","coupons","profits"].map(x=>`<label style="display:inline-block;margin-left:12px"><input type="checkbox" class="employeePerm" value="${x}"> ${({products:"المنتجات",orders:"الطلبات",coupons:"الكوبونات",profits:"المبيعات"})[x]}</label>`).join("")}
+</div>
+<button onclick="makeEmployee()">تحويل إلى موظف</button>
+<div class="scroll" style="margin-top:15px"><table><thead><tr><th>الموظف</th><th>الحالة</th><th>الصلاحيات</th><th>الإجراء</th></tr></thead><tbody>
+${list.map(p=>`<tr><td>${esc(p.full_name||"بدون اسم")}<br><small>${esc(p.id)}</small></td>
+<td>${p.is_active?"نشط":"موقوف"}</td><td>${esc(Array.isArray(p.permissions)?p.permissions.join("، "):"")}</td>
+<td><div class="actions"><button onclick="editEmployee('${p.id}')">الصلاحيات</button><button class="danger" onclick="removeEmployee('${p.id}')">إزالة</button></div></td></tr>`).join("")}
+</tbody></table></div>`;
+}
+async function makeEmployee(){
+const id=$("newEmployeeId").value.trim();
+if(!id)return alert("أدخل معرّف الحساب.");
+const perms=[...document.querySelectorAll(".employeePerm:checked")].map(x=>x.value);
+const {error}=await db.rpc("manage_store_employee",{
+target_user:id,employee_permissions:perms,active_status:true
+});
+if(error)return alert(error.message);
+alert("تم تحويل الحساب إلى موظف.");await loadStaffData();
+}
+async function editEmployee(id){
+const p=adminCache.profiles.find(x=>x.id===id);
+if(!p)return;
+const current=Array.isArray(p.permissions)?p.permissions:[];
+const selected=prompt("اكتب الصلاحيات مفصولة بفواصل:\nproducts,orders,coupons,profits",current.join(","));
+if(selected===null)return;
+const perms=selected.split(",").map(x=>x.trim()).filter(x=>["products","orders","coupons","profits"].includes(x));
+const {error}=await db.rpc("manage_store_employee",{
+target_user:id,employee_permissions:perms,active_status:p.is_active
+});
+if(error)return alert(error.message);
+alert("تم تحديث الصلاحيات.");await loadStaffData();
+}
+async function removeEmployee(id){
+if(!confirm("هل تريد إعادة هذا الحساب إلى عميل؟"))return;
+const {error}=await db.rpc("remove_store_employee",{target_user:id});
+if(error)return alert(error.message);
+await loadStaffData();
+}
+function customersContent(){
+return `<h3>العملاء</h3><div class="scroll"><table><thead><tr><th>الاسم</th><th>البريد</th><th>الحساب</th><th>المعرف</th></tr></thead><tbody>
+${adminCache.profiles.filter(p=>p.role!=="employee"&&p.role!=="admin").map(p=>`<tr><td>${esc(p.full_name||"بدون اسم")}</td><td>${esc(p.email||"—")}</td><td>${esc(p.role)}</td><td><small>${esc(p.id)}</small></td></tr>`).join("")}
+</tbody></table></div>`;
+}
+function showOrderDetails(id){
+const o=adminCache.orders.find(x=>String(x.id)===String(id));if(!o)return;
+showModal("تفاصيل الطلب",`<div class="summary">
+<p><b>العميل:</b> ${esc(o.customer_name)}</p>
+<p><b>البريد:</b> ${esc(o.customer_email)}</p>
+<p><b>المنتج:</b> ${esc(o.product_name)}</p>
+<p><b>المبلغ:</b> ${money(o.total)}</p>
+<p><b>حالة الدفع:</b> ${esc(o.payment_status)}</p>
+<p><b>منفذ الطلب:</b> ${esc(o.account_sent_by_name||"لم ينفذ")}</p>
+<p><b>وقت التنفيذ:</b> ${o.account_sent_at?new Date(o.account_sent_at).toLocaleString("ar-SA"):"لم ينفذ"}</p>
+</div>`);
+}
+async function approveOrder(id){
+if(!can("orders"))return alert("ليس لديك صلاحية.");
+if(!confirm("اعتماد الدفع؟"))return;
+const {error}=await db.rpc("approve_store_payment",{p_order_id:id});
+if(error)return alert(error.message);
+alert("تم اعتماد الدفع.");await loadStaffData();
+}
+async function rejectOrder(id){
+if(!can("orders"))return alert("ليس لديك صلاحية.");
+const reason=prompt("سبب رفض الدفع:");if(!reason)return;
+const {error}=await db.rpc("reject_store_payment",{p_order_id:id,p_reason:reason});
+if(error)return alert(error.message);
+alert("تم رفض الدفع.");await loadStaffData();
+}
+async function markAccountSent(id){
+if(!can("orders"))return alert("ليس لديك صلاحية.");
+if(!confirm("تأكيد تنفيذ وتسليم الطلب؟"))return;
+const {error}=await db.rpc("mark_account_sent",{p_order_id:id});
+if(error)return alert(error.message);
+alert("تم تسجيل التنفيذ.");await loadStaffData();
 }
 
-function closeModal() {
-  $("modal").classList.add("hidden");
-  $("body").innerHTML = "";
+async function initStore(){
+$("year").textContent=new Date().getFullYear();
+await refreshSession();
+await loadProducts();
+db.auth.onAuthStateChange(()=>setTimeout(refreshSession,0));
 }
-
-function showModal(title, html) {
-  $("title").textContent = title;
-  $("body").innerHTML = html;
-  $("modal").classList.remove("hidden");
-}
-
-function money(value) {
-  return Number(value || 0).toFixed(2) + " ريال";
-}
-
-function isAdmin() {
-  return profile?.role === "admin";
-}
-
-function permissions() {
-  try {
-    const value = profile?.permissions;
-    if (Array.isArray(value)) return value;
-    return JSON.parse(value || "[]");
-  } catch {
-    return [];
-  }
-}
-
-function can(permission) {
-  if (isAdmin()) return true;
-  return profile?.role === "employee" &&
-    profile?.is_active === true &&
-    permissions().includes(permission);
-}
-
-function isStaff() {
-  return isAdmin() ||
-    (profile?.role === "employee" && profile?.is_active === true);
-}
-
-function updateStaffIdentity() {
-  const identity = $("staffIdentity");
-
-  if (!user || !isStaff()) {
-    identity.classList.add("hidden");
-    return;
-  }
-
-  identity.classList.remove("hidden");
-  identity.classList.toggle("admin", isAdmin());
-
-  const name = profile?.full_name || "موظف";
-  $("staffName").textContent = name;
-  $("staffAvatar").textContent = name.trim().charAt(0) || "م";
-  $("staffRank").textContent = isAdmin() ? "مدير المتجر" : "موظف";
-}
-
-function updateNavigation() {
-  $("loginBtn").classList.toggle("hidden", !!user);
-  $("logoutBtn").classList.toggle("hidden", !user);
-  $("ordersBtn").classList.toggle("hidden", !user);
-  $("staffBtn").classList.toggle("hidden", !isStaff());
-  updateStaffIdentity();
-}
-
-async function getProfile() {
-  if (!user) {
-    profile = null;
-    return;
-  }
-
-  const {data,error} = await db
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  if (error) {
-    console.error(error);
-    profile = null;
-    return;
-  }
-
-  profile = data;
-}
-
-async function loadProducts() {
-  const {data,error} = await db
-    .from("products")
-    .select("*")
-    .eq("is_active", true)
-    .order("created_at", {ascending:false});
-
-  if (error) {
-    $("grid").innerHTML =
-      '<div class="empty">تعذر تحميل المنتجات. حاول تحديث الصفحة.</div>';
-    console.error(error);
-    return;
-  }
-
-  products = data || [];
-  renderCategories();
-  render();
-}
-
-function renderCategories() {
-  const select = $("categoryFilter");
-  const current = select.value;
-  const categories = [...new Set(
-    products.map(p => p.category).filter(Boolean)
-  )];
-
-  select.innerHTML =
-    '<option value="">كل التصنيفات</option>' +
-    categories.map(c =>
-      `<option value="${esc(c)}">${esc(c)}</option>`
-    ).join("");
-
-  select.value = current;
-}
-
-function render() {
-  const search = ($("search")?.value || "").trim().toLowerCase();
-  const category = $("categoryFilter")?.value || "";
-
-  const list = products.filter(p => {
-    const matchesSearch =
-      String(p.name || "").toLowerCase().includes(search) ||
-      String(p.description || "").toLowerCase().includes(search);
-
-    return matchesSearch &&
-      (!category || p.category === category);
-  });
-
-  $("grid").innerHTML = list.length ? list.map(p => `
-    <article class="card product">
-      ${p.image_url
-        ? `<img src="${esc(p.image_url)}" alt="${esc(p.name)}">`
-        : `<div class="empty">منتج رقمي</div>`}
-      <h3>${esc(p.name)}</h3>
-      <div class="desc">${esc(p.description || "")}</div>
-      <div class="bottom">
-        <div class="price">${money(p.price)}</div>
-        <button style="width:100%;margin-top:10px"
-          onclick="addToCart('${esc(p.id)}')">
-          أضف للسلة
-        </button>
-      </div>
-    </article>
-  `).join("") : '<div class="empty">لا توجد منتجات حاليًا.</div>';
-}
-
-function scrollProducts() {
-  $("products").scrollIntoView({behavior:"smooth"});
-}
-
-function addToCart(id) {
-  const product = products.find(p => String(p.id) === String(id));
-  if (!product) return;
-
-  if (!product.is_unlimited && Number(product.stock || 0) < 1) {
-    message("عذرًا، المنتج نفد من المخزون.", "bad");
-    return;
-  }
-
-  cart.push(product);
-  $("count").textContent = cart.length;
-  message("تمت إضافة المنتج إلى السلة.", "ok");
-}
-
-function cartView() {
-  if (!cart.length) {
-    showModal("السلة", '<div class="empty">السلة فارغة حاليًا.</div>');
-    return;
-  }
-
-  const total = cart.reduce((sum,p) => sum + Number(p.price || 0), 0);
-
-  showModal("سلة المشتريات", `
-    ${cart.map((p,i) => `
-      <div class="summary row">
-        <div>${esc(p.name)}<br><b>${money(p.price)}</b></div>
-        <button class="danger" onclick="removeCart(${i})">حذف</button>
-      </div>
-    `).join("")}
-    <h3>الإجمالي: ${money(total)}</h3>
-    <button onclick="checkout()">إكمال الطلب</button>
-  `);
-}
-
-function removeCart(index) {
-  cart.splice(index,1);
-  $("count").textContent = cart.length;
-  closeModal();
-  cartView();
-}
-
-async function checkout() {
-  if (!user) {
-    closeModal();
-    authView();
-    message("سجّل الدخول أولًا لإكمال الطلب.");
-    return;
-  }
-
-  if (!cart.length) return;
-
-  const product = cart[0];
-
-  if (cart.length > 1) {
-    message("أكمل طلب كل منتج بشكل منفصل حاليًا.");
-  }
-
-  closeModal();
-
-  showModal("إتمام الطلب", `
-    <div class="summary">
-      المنتج: ${esc(product.name)}<br>
-      السعر: <b>${money(product.price)}</b>
-    </div>
-    <div class="field">
-      <label>اسم العميل</label>
-      <input id="customerName" value="${esc(profile?.full_name || "")}">
-    </div>
-    <div class="field">
-      <label>رقم الجوال</label>
-      <input id="customerPhone" placeholder="05xxxxxxxx">
-    </div>
-    <div class="field">
-      <label>كود الخصم (اختياري)</label>
-      <input id="couponCode" placeholder="أدخل كود الخصم">
-    </div>
-    <button onclick="createOrder('${esc(product.id)}')">تأكيد الطلب</button>
-  `);
-}
-
-async function createOrder(productId) {
-  const customerName = $("customerName")?.value.trim();
-  const customerPhone = $("customerPhone")?.value.trim();
-  const couponCode = $("couponCode")?.value.trim() || null;
-
-  if (!customerName) {
-    alert("اكتب اسم العميل.");
-    return;
-  }
-
-  const {data,error} = await db.rpc(
-    "create_store_order_with_coupon",
-    {
-      p_product_id: productId,
-      p_customer_name: customerName,
-      p_customer_phone: customerPhone || null,
-      p_coupon_code: couponCode
-    }
-  );
-
-  if (error) {
-    alert(error.message);
-    return;
-  }
-
-  cart = cart.filter(p => String(p.id) !== String(productId));
-  $("count").textContent = cart.length;
-  closeModal();
-
-  message("تم إنشاء طلبك بنجاح. تابع حالة الطلب من حسابك.", "ok");
-}
-
-function authView() {
-  showModal("تسجيل الدخول", `
-    <div class="field">
-      <label>البريد الإلكتروني</label>
-      <input id="authEmail" type="email" placeholder="name@example.com">
-    </div>
-    <div class="field">
-      <label>كلمة المرور</label>
-      <input id="authPassword" type="password">
-    </div>
-    <button onclick="login()">دخول</button>
-    <button class="secondary" onclick="registerView()">إنشاء حساب جديد</button>
-  `);
-}
-
-async function login() {
-  const email = $("authEmail").value.trim();
-  const password = $("authPassword").value;
-
-  const {error} = await db.auth.signInWithPassword({email,password});
-
-  if (error) {
-    alert(error.message);
-    return;
-  }
-
-  closeModal();
-  await refreshSession();
-  message("تم تسجيل الدخول بنجاح.", "ok");
-}
-
-function registerView() {
-  showModal("إنشاء حساب جديد", `
-    <div class="field">
-      <label>الاسم الكامل</label>
-      <input id="regName">
-    </div>
-    <div class="field">
-      <label>البريد الإلكتروني</label>
-      <input id="regEmail" type="email">
-    </div>
-    <div class="field">
-      <label>كلمة المرور</label>
-      <input id="regPassword" type="password">
-    </div>
-    <button onclick="register()">إنشاء الحساب</button>
-  `);
-}
-
-async function register() {
-  const fullName = $("regName").value.trim();
-  const email = $("regEmail").value.trim();
-  const password = $("regPassword").value;
-
-  if (!fullName || !email || password.length < 6) {
-    alert("أكمل البيانات، واجعل كلمة المرور 6 أحرف على الأقل.");
-    return;
-  }
-
-  const {data,error} = await db.auth.signUp({
-    email,
-    password,
-    options:{data:{full_name:fullName}}
-  });
-
-  if (error) {
-    alert(error.message);
-    return;
-  }
-
-  closeModal();
-  message(
-    "تم إنشاء الحساب. إذا طُلب منك تأكيد البريد، افتح رسالة التأكيد أولًا.",
-    "ok"
-  );
-
-  if (data.session) await refreshSession();
-}
-
-async function logout() {
-  const {error} = await db.auth.signOut();
-  if (error) {
-    alert(error.message);
-    return;
-  }
-
-  user = null;
-  profile = null;
-  updateNavigation();
-  message("تم تسجيل الخروج.");
-}
-
-async function refreshSession() {
-  const {data} = await db.auth.getSession();
-  user = data.session?.user || null;
-
-  await getProfile();
-  updateNavigation();
-}
-
-async function ordersView() {
-  if (!user) return authView();
-
-  const {data,error} = await db
-    .from("orders")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("created_at", {ascending:false});
-
-  if (error) {
-    message("تعذر تحميل الطلبات: " + error.message, "bad");
-    return;
-  }
-
-  showModal("طلباتي", data?.length ? `
-    <div class="scroll">
-      <table>
-        <thead><tr>
-          <th>المنتج</th><th>المبلغ</th><th>حالة الدفع</th><th>التاريخ</th>
-        </tr></thead>
-        <tbody>
-          ${data.map(o => `
-            <tr>
-              <td>${esc(o.product_name)}</td>
-              <td>${money(o.total)}</td>
-              <td>${esc(o.payment_status)}</td>
-              <td>${new Date(o.created_at).toLocaleString("ar-SA")}</td>
-            </tr>
-          `).join("")}
-        </tbody>
-      </table>
-    </div>
-  ` : '<div class="empty">لا توجد طلبات حتى الآن.</div>');
-}
-
-/* بداية التشغيل */
-async function initStore() {
-  $("year").textContent = new Date().getFullYear();
-
-  await refreshSession();
-  await loadProducts();
-
-  db.auth.onAuthStateChange(() => {
-    setTimeout(async () => {
-      await refreshSession();
-    }, 0);
-  });
-}
-
 initStore();
 </script>
-<script>
-/* لوحة الإدارة والموظفين */
-
-function staffView() {
-  if (!isStaff()) {
-    message("ليس لديك صلاحية دخول لوحة الإدارة.", "bad");
-    return;
-  }
-
-  adminTab = "overview";
-  loadStaffData();
-}
-
-async function loadStaffData() {
-  if (!isStaff()) return;
-
-  $("products").classList.add("hidden");
-
-  const results = await Promise.all([
-    db.from("orders").select("*").order("created_at",{ascending:false}),
-    db.from("products").select("*").order("created_at",{ascending:false}),
-    db.from("coupons").select("*").order("created_at",{ascending:false})
-  ]);
-
-  if (results.some(r => r.error)) {
-    message("تعذر تحميل بيانات لوحة الإدارة.", "bad");
-    console.error(results.map(r => r.error));
-    return;
-  }
-
-  adminCache.orders = results[0].data || [];
-  adminCache.products = results[1].data || [];
-  adminCache.coupons = results[2].data || [];
-
-  if (isAdmin()) {
-    const p = await db.from("profiles")
-      .select("id,full_name,email,role,permissions,is_active,created_at");
-
-    adminCache.profiles = p.error ? [] : (p.data || []);
-  }
-
-  renderAdmin();
-}
-
-function renderAdmin() {
-  if (!isStaff()) return;
-
-  const tabs = [
-    ["overview","الرئيسية"],
-    ["orders","الطلبات"],
-    ["products","المنتجات"],
-    ["coupons","الكوبونات"]
-  ];
-
-  if (can("profits")) tabs.push(["profits","الأرباح والمبيعات"]);
-  if (isAdmin()) tabs.push(["employees","الموظفون"]);
-  if (isAdmin()) tabs.push(["customers","العملاء"]);
-
-  showModal("لوحة إدارة جلغيفي بلس", `
-    <div class="notice">
-      مرحبًا ${esc(profile?.full_name || "بك")}.
-      <br>نوع الحساب: ${isAdmin() ? "مدير" : "موظف"}
-    </div>
-
-    <div class="tabs">
-      ${tabs.map(([id,label]) => `
-        <button class="${adminTab === id ? "active" : "secondary"}"
-          onclick="adminTab='${id}';renderAdmin()">
-          ${label}
-        </button>
-      `).join("")}
-    </div>
-
-    <div id="adminContent" class="adminsection">
-      ${adminContent()}
-    </div>
-  `);
-}
-
-function adminContent() {
-  const orders = adminCache.orders || [];
-  const productsList = adminCache.products || [];
-  const paidOrders = orders.filter(o => o.payment_status === "paid");
-
-  if (adminTab === "overview") {
-    return `
-      <div class="stats">
-        <div class="stat">
-          <strong>${orders.length}</strong><span>كل الطلبات</span>
-        </div>
-        <div class="stat">
-          <strong>${paidOrders.length}</strong><span>الطلبات المدفوعة</span>
-        </div>
-        <div class="stat">
-          <strong>${productsList.length}</strong><span>المنتجات</span>
-        </div>
-        <div class="stat">
-          <strong>${money(paidOrders.reduce((s,o)=>s+Number(o.total||0),0))}</strong>
-          <span>إجمالي المبيعات</span>
-        </div>
-      </div>
-      <p class="muted small">
-        الأرقام هنا مبنية على الطلبات المسجلة في المتجر.
-      </p>
-      <button class="secondary" onclick="loadStaffData()">تحديث البيانات</button>
-    `;
-  }
-
-  if (adminTab === "orders") {
-    if (!can("orders")) return noPermission();
-
-    return orders.length ? `
-      <div class="scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>العميل</th><th>المنتج</th><th>المبلغ</th>
-              <th>الدفع</th><th>التاريخ</th><th>الإجراء</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${orders.map(o => `
-              <tr>
-                <td>${esc(o.customer_name)}</td>
-                <td>${esc(o.product_name)}</td>
-                <td>${money(o.total)}</td>
-                <td>${esc(o.payment_status)}</td>
-                <td>${new Date(o.created_at).toLocaleString("ar-SA")}</td>
-                <td>
-                  <div class="actions">
-                    ${o.payment_status === "under_review" ? `
-                      <button class="success" onclick="approveOrder('${o.id}')">قبول الدفع</button>
-                      <button class="danger" onclick="rejectOrder('${o.id}')">رفض</button>
-                    ` : ""}
-                    ${o.payment_status === "paid" && !o.account_sent_at ? `
-                      <button onclick="markAccountSent('${o.id}')">تأكيد التنفيذ</button>
-                    ` : ""}
-                    <button class="secondary" onclick="showOrderDetails('${o.id}')">التفاصيل</button>
-                  </div>
-                </td>
-              </tr>
-            `).join("")}
-          </tbody>
-        </table>
-      </div>
-    ` : '<div class="empty">لا توجد طلبات.</div>';
-  }
-
-  if (adminTab === "products") {
-    if (!can("products")) return noPermission();
-
-    return `
-      <h3>المنتجات</h3>
-      <div class="scroll">
-        <table>
-          <thead><tr><th>المنتج</th><th>السعر</th><th>المخزون</th><th>الحالة</th></tr></thead>
-          <tbody>
-            ${productsList.map(p => `
-              <tr>
-                <td>${esc(p.name)}</td>
-                <td>${money(p.price)}</td>
-                <td>${p.is_unlimited ? "غير محدود" : esc(p.stock)}</td>
-                <td>${p.is_active ? "مفعل" : "غير مفعل"}</td>
-              </tr>
-            `).join("")}
-          </tbody>
-        </table>
-      </div>
-      <p class="muted small">هذه قائمة عرض. تعديل المنتجات يحتاج ربط نموذج الحفظ بسياسات Supabase المناسبة.</p>
-    `;
-  }
-
-  if (adminTab === "coupons") {
-    if (!can("coupons")) return noPermission();
-
-    return `
-      <h3>الكوبونات</h3>
-      <div class="scroll">
-        <table>
-          <thead><tr><th>الكود</th><th>الخصم</th><th>الاستخدام</th><th>الحالة</th></tr></thead>
-          <tbody>
-            ${(adminCache.coupons || []).map(c => `
-              <tr>
-                <td>${esc(c.code)}</td>
-                <td>${esc(c.discount_value)} ${c.discount_type === "percent" ? "%" : "ريال"}</td>
-                <td>${esc(c.usage_count || 0)}</td>
-                <td>${c.is_active ? "مفعل" : "متوقف"}</td>
-              </tr>
-            `).join("")}
-          </tbody>
-        </table>
-      </div>
-    `;
-  }
-
-  if (adminTab === "profits") {
-    if (!can("profits")) return noPermission();
-    return profitsContent();
-  }
-
-  if (adminTab === "employees") {
-    if (!isAdmin()) return noPermission();
-    return employeesContent();
-  }
-
-  if (adminTab === "customers") {
-    if (!isAdmin()) return noPermission();
-
-    return `
-      <h3>العملاء</h3>
-      <div class="scroll">
-        <table>
-          <thead><tr><th>الاسم</th><th>البريد</th><th>نوع الحساب</th></tr></thead>
-          <tbody>
-            ${adminCache.profiles.map(p => `
-              <tr>
-                <td>${esc(p.full_name || "بدون اسم")}</td>
-                <td>${esc(p.email || "—")}</td>
-                <td>${esc(p.role)}</td>
-              </tr>
-            `).join("")}
-          </tbody>
-        </table>
-      </div>
-    `;
-  }
-
-  return "";
-}
-
-function noPermission() {
-  return '<div class="notice bad">ليس لديك صلاحية الوصول إلى هذا القسم. اطلب من المدير منحك الصلاحية.</div>';
-}
-
-/* الأرباح والمبيعات */
-function profitsContent() {
-  const paid = adminCache.orders.filter(o => o.payment_status === "paid");
-
-  const totalSales = paid.reduce((sum,o) =>
-    sum + Number(o.total || 0), 0
-  );
-
-  const today = new Intl.DateTimeFormat("en-CA", {
-    timeZone:"Asia/Riyadh",
-    year:"numeric",month:"2-digit",day:"2-digit"
-  }).format(new Date());
-
-  const todaySales = paid.filter(o => {
-    const orderDay = new Intl.DateTimeFormat("en-CA", {
-      timeZone:"Asia/Riyadh",
-      year:"numeric",month:"2-digit",day:"2-digit"
-    }).format(new Date(o.created_at));
-
-    return orderDay === today;
-  });
-
-  const todayTotal = todaySales.reduce((sum,o) =>
-    sum + Number(o.total || 0), 0
-  );
-
-  return `
-    <h3>الأرباح والمبيعات</h3>
-    <div class="stats">
-      <div class="stat">
-        <strong>${money(totalSales)}</strong>
-        <span>إجمالي المبيعات المدفوعة</span>
-      </div>
-      <div class="stat">
-        <strong>${money(todayTotal)}</strong>
-        <span>مبيعات اليوم بتوقيت السعودية</span>
-      </div>
-      <div class="stat">
-        <strong>${paid.length}</strong>
-        <span>عدد الطلبات المدفوعة</span>
-      </div>
-      <div class="stat">
-        <strong>${todaySales.length}</strong>
-        <span>طلبات اليوم المدفوعة</span>
-      </div>
-    </div>
-
-    <h3>سجل المشتريات</h3>
-    ${paid.length ? `
-      <div class="scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>العميل</th><th>المنتج</th><th>المبلغ</th>
-              <th>تاريخ الطلب</th><th>منفذ الطلب</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${paid.map(o => `
-              <tr>
-                <td>${esc(o.customer_name)}</td>
-                <td>${esc(o.product_name)}</td>
-                <td>${money(o.total)}</td>
-                <td>${new Date(o.created_at).toLocaleString("ar-SA",{timeZone:"Asia/Riyadh"})}</td>
-                <td>${esc(o.account_sent_by_name || "لم ينفذ بعد")}</td>
-              </tr>
-            `).join("")}
-          </tbody>
-        </table>
-      </div>
-    ` : '<div class="empty">لا توجد مبيعات مدفوعة حتى الآن.</div>'}
-
-    <p class="muted small">
-      المبيعات محسوبة من الطلبات المدفوعة، دون خصم تكلفة المنتجات.
-      لا يتم حذف السجلات عند بداية يوم جديد.
-    </p>
-    <button class="secondary" onclick="loadStaffData()">تحديث المبيعات</button>
-  `;
-}
-
-/* عرض الموظفين */
-function employeesContent() {
-  const employees = adminCache.profiles.filter(p =>
-    p.role === "employee"
-  );
-
-  return `
-    <h3>إدارة الموظفين</h3>
-    <div class="notice">
-      المدير وحده يستطيع إدارة الموظفين والصلاحيات.
-      <br>هذه القائمة تعرض الموظفين وصلاحياتهم الحالية.
-    </div>
-
-    ${employees.length ? `
-      <div class="scroll">
-        <table>
-          <thead>
-            <tr><th>اسم الموظف</th><th>الحالة</th><th>الصلاحيات</th></tr>
-          </thead>
-          <tbody>
-            ${employees.map(p => `
-              <tr>
-                <td>${esc(p.full_name || "بدون اسم")}</td>
-                <td>${p.is_active ? "نشط" : "موقوف"}</td>
-                <td>${esc(
-                  Array.isArray(p.permissions)
-                    ? p.permissions.join("، ")
-                    : p.permissions || "لا توجد"
-                )}</td>
-              </tr>
-            `).join("")}
-          </tbody>
-        </table>
-      </div>
-    ` : '<div class="empty">لا يوجد موظفون.</div>'}
-
-    <div class="notice bad">
-      تعديل صلاحيات الموظفين أو تحويل حساب عميل إلى موظف غير مفعّل من هذه الواجهة؛
-      يجب ربطه بدالة Supabase آمنة تتحقق من أن المنفذ هو المدير.
-    </div>
-  `;
-}
-
-/* تفاصيل الطلب */
-function showOrderDetails(id) {
-  const o = adminCache.orders.find(x => String(x.id) === String(id));
-  if (!o) return;
-
-  showModal("تفاصيل الطلب", `
-    <div class="summary">
-      <p><b>العميل:</b> ${esc(o.customer_name)}</p>
-      <p><b>البريد:</b> ${esc(o.customer_email)}</p>
-      <p><b>المنتج:</b> ${esc(o.product_name)}</p>
-      <p><b>المبلغ:</b> ${money(o.total)}</p>
-      <p><b>حالة الدفع:</b> ${esc(o.payment_status)}</p>
-      <p><b>تم التنفيذ بواسطة:</b> ${esc(o.account_sent_by_name || "غير مسجل")}</p>
-      <p><b>وقت التنفيذ:</b> ${o.account_sent_at ? new Date(o.account_sent_at).toLocaleString("ar-SA") : "لم ينفذ بعد"}</p>
-      <p><b>تاريخ الطلب:</b> ${new Date(o.created_at).toLocaleString("ar-SA")}</p>
-    </div>
-  `);
-}
-
-/* قبول الدفع */
-async function approveOrder(id) {
-  if (!can("orders")) return alert("ليس لديك صلاحية.");
-
-  if (!confirm("هل تريد اعتماد الدفع؟")) return;
-
-  const {error} = await db.rpc("approve_store_payment", {
-    p_order_id:id
-  });
-
-  if (error) return alert(error.message);
-
-  alert("تم اعتماد الدفع.");
-  await loadStaffData();
-}
-
-/* رفض الدفع */
-async function rejectOrder(id) {
-  if (!can("orders")) return alert("ليس لديك صلاحية.");
-
-  const reason = prompt("اكتب سبب رفض الدفع:");
-  if (!reason) return;
-
-  const {error} = await db.rpc("reject_store_payment", {
-    p_order_id:id,
-    p_reason:reason
-  });
-
-  if (error) return alert(error.message);
-
-  alert("تم رفض الدفع.");
-  await loadStaffData();
-}
-
-/* تأكيد تنفيذ الطلب */
-async function markAccountSent(id) {
-  if (!can("orders")) return alert("ليس لديك صلاحية.");
-
-  if (!confirm("هل تؤكد تنفيذ وتسليم الطلب؟")) return;
-
-  const {error} = await db.rpc("mark_account_sent", {
-    p_order_id:id
-  });
-
-  if (error) return alert(error.message);
-
-  alert("تم تسجيل تنفيذ الطلب واسم الموظف.");
-  await loadStaffData();
-}
-</script>
-
 </body>
 </html>
