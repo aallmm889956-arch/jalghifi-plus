@@ -168,24 +168,31 @@ function ordersTable(list){return `<div class="scroll"><table><tr><th>الطلب
 function filterAdminOrders(){const q=($('orderSearch').value||'').toLowerCase();$('ordersTable').innerHTML=ordersTable(adminCache.orders.filter(o=>[o.id,o.product_name,o.customer_name,o.customer_email,o.customer_phone].some(v=>String(v||'').toLowerCase().includes(q))));}
 async function deleteReview(id) {
   if (!isAdmin()) return say('المدير فقط يستطيع حذف التقييمات', 'bad');
-  if (!confirm('هل أنت متأكد من حذف التقييم نهائيًا؟')) return;
+  if (!confirm('هل تريد حذف التقييم نهائيًا؟')) return;
+
+  const r = await db.from('reviews').delete().eq('id', id);
+  if (r.error) return say('فشل الحذف: ' + r.error.message, 'bad');
+
+  adminCache.reviews = adminCache.reviews.filter(x => x.id !== id);
+  say('تم حذف التقييم', 'ok');
+  renderAdmin();
+  await getProducts();
+}
+async function toggleReviewVisibility(id, visible) {
+  if (!isAdmin()) return say('المدير فقط يستطيع إدارة التقييمات', 'bad');
 
   const r = await db.from('reviews')
-    .delete()
-    .eq('id', id)
-    .select('id');
+    .update({ is_visible: visible })
+    .eq('id', id);
 
-  if (r.error) return say('فشل الحذف: ' + r.error.message, 'bad');
-  if (!r.data || r.data.length === 0)
-    return say('لم يُحذف التقييم. تحقق من صلاحيات الحذف في Supabase.', 'bad');
+  if (r.error) return say('تعذر تغيير ظهور التقييم: ' + r.error.message, 'bad');
 
-  say('تم حذف التقييم نهائيًا', 'ok');
-  await getProducts();
+  say(visible ? 'تم إظهار التقييم' : 'تم إخفاء التقييم', 'ok');
   await staffView();
   adminTab = 'reviews';
   renderAdmin();
+  await getProducts();
 }
-async function toggleReviewVisibility(id,visible){if(!isAdmin())return say('المدير فقط يستطيع إدارة التقييمات','bad');const r=await db.from('reviews').update({is_visible:visible}).eq('id',id);if(r.error)return say('تعذر تغيير ظهور التقييم. تأكد أن جدول reviews يحتوي عمود is_visible: '+r.error.message,'bad');say(visible?'تم إظهار التقييم':'تم إخفاء التقييم','ok');await staffView();adminTab='reviews';renderAdmin();await getProducts();}
 async function saveSettings(){if(!isAdmin())return say('هذه الخاصية للمدير فقط','bad');if(!settings.id)return say('لا يوجد سجل إعدادات في جدول store_settings. أضف سجلًا واحدًا ثم حدّث الصفحة.','bad');const payload={store_name:$('settingStoreName').value.trim(),whatsapp_number:$('settingWhatsapp').value.trim(),bank_name:$('settingBank').value.trim(),account_name:$('settingAccountName').value.trim(),account_number:$('settingAccountNumber').value.trim(),iban:$('settingIban').value.trim(),welcome_coupon:$('settingWelcomeCoupon').value.trim(),updated_at:new Date().toISOString()};const r=await db.from('store_settings').update(payload).eq('id',settings.id).select().maybeSingle();if(r.error)return say('تعذر حفظ الإعدادات: '+r.error.message,'bad');if(!r.data)return say('لم يتم تحديث السجل. تحقق من صلاحيات RLS لجدول store_settings.','bad');settings=r.data;refreshWhatsapp();say('تم حفظ إعدادات المتجر','ok');renderAdmin();}
 async function toggleProduct(id,active){if(!isStaff())return say('ليس لديك صلاحية','bad');const r=await db.from('products').update({is_active:active,updated_at:new Date().toISOString()}).eq('id',id);if(r.error)return say(r.error.message,'bad');say(active?'تم إظهار المنتج':'تم إخفاء المنتج','ok');await staffView();await getProducts();}
 function couponForm(c={}){modal(c.id?'تعديل كود خصم':'إنشاء كود خصم',`<div class="field"><label>الكود</label><input id="cpCode" value="${esc(c.code||'')}" placeholder="SAVE20"></div><div class="field"><label>نوع الخصم</label><select id="cpType"><option value="percent" ${c.discount_type==='percent'?'selected':''}>نسبة مئوية</option><option value="fixed" ${c.discount_type==='fixed'?'selected':''}>مبلغ ثابت</option></select></div><div class="field"><label>قيمة الخصم</label><input id="cpValue" type="number" min="0.01" step="0.01" value="${c.discount_value??''}"></div><div class="field"><label>تاريخ الانتهاء</label><input id="cpExpiry" type="datetime-local" value="${c.expires_at?new Date(new Date(c.expires_at).getTime()-new Date(c.expires_at).getTimezoneOffset()*60000).toISOString().slice(0,16):''}"></div><div class="field"><label>الحد الأقصى للاستخدام</label><input id="cpLimit" type="number" min="1" value="${c.usage_limit??''}"></div><label><input id="cpActive" type="checkbox" ${c.is_active===false?'':'checked'}> الكود مفعل</label><p><button onclick="saveCoupon('${c.id||''}')">حفظ الكود</button></p>`);}
@@ -194,7 +201,32 @@ async function saveCoupon(id){const code=$('cpCode').value.trim().toUpperCase().
 async function toggleCoupon(id,active){const r=await db.from('coupons').update({is_active:active}).eq('id',id);if(r.error)return say(r.error.message,'bad');say(active?'تم تفعيل الكود':'تم إيقاف الكود','ok');await staffView();}
 async function orderDetails(id){const r=await db.from('orders').select('*').eq('id',id).single();if(r.error)return say(r.error.message,'bad');const o=r.data;modal('تفاصيل الطلب',`<div class="card"><p><b>المنتج:</b> ${esc(o.product_name)}</p><p><b>اسم العميل:</b> ${esc(o.customer_name)}</p><p><b>البريد الإلكتروني:</b> ${esc(o.customer_email||'غير مسجل')}</p><p><b>الجوال:</b> ${esc(o.customer_phone||'غير مسجل')}</p><hr><p>قبل الخصم: ${cash(o.subtotal??o.total)}</p><p>الكود: ${esc(o.coupon_code||'لا يوجد')}</p><p>الخصم: ${cash(o.discount_amount)}</p><p><b>الإجمالي: ${cash(o.total)}</b></p><p>حالة الدفع: ${esc(paymentLabel(o))}</p><p>رقم العملية: ${esc(o.payment_reference||'غير مضاف')}</p><p>حالة التسليم: ${o.account_sent_at?'تم التسليم':'لم يتم تسجيل التسليم'}</p>${o.account_sent_at?`<p>وقت التسليم: ${new Date(o.account_sent_at).toLocaleString('ar-SA')}</p><p><b>نفّذ الطلب:</b> ${esc(o.account_sent_by_name||o.execution_by_name||'اسم المنفذ غير مسجل في الطلب القديم')}</p>`:''}<p>تاريخ الطلب: ${o.created_at?new Date(o.created_at).toLocaleString('ar-SA'):''}</p>${o.rejection_reason?`<p>سبب الرفض: ${esc(o.rejection_reason)}</p>`:''}${o.receipt_path?`<button onclick="showReceipt('${o.id}')">فتح إيصال التحويل</button>`:'<p class="muted">لم يرفع العميل إيصالًا.</p>'}${o.payment_status==='paid'&&!o.account_sent_at?`<div class="notice">بعد إرسال المنتج يدويًا إلى بريد العميل، اضغط «تم الإرسال بالبريد» في قائمة الطلبات.</div><button onclick="markAccountSent('${o.id}')">تم الإرسال بالبريد</button>`:''}</div>`);}
 async function showReceipt(id){if(!isStaff())return say('ليس لديك صلاحية','bad');const q=await db.from('orders').select('receipt_path').eq('id',id).single();if(q.error)return say(q.error.message,'bad');if(!q.data.receipt_path)return say('لا يوجد إيصال','bad');const r=await db.storage.from('payment-receipts').createSignedUrl(q.data.receipt_path,120);if(r.error)return say('تعذر فتح الإيصال: '+r.error.message,'bad');window.open(r.data.signedUrl,'_blank','noopener');}
-async function markAccountSent(id){if(!isStaff())return say('ليس لديك صلاحية','bad');if(!confirm('هل أرسلت المنتج أو بيانات الحساب إلى بريد العميل بالفعل؟'))return;const r=await db.rpc('mark_account_sent',{p_order_id:id});if(r.error)return say(r.error.message,'bad');say('تم تسجيل التسليم عبر البريد','ok');await staffView();}
+async function markAccountSent(id) {
+  if (!isStaff()) return say('ليس لديك صلاحية', 'bad');
+  if (!confirm('هل أرسلت المنتج إلى العميل؟')) return;
+
+  const name = profile?.full_name || user?.email || 'موظف';
+  const now = new Date().toISOString();
+
+  const r = await db.rpc('mark_account_sent', { p_order_id: id });
+  if (r.error) return say(r.error.message, 'bad');
+
+  const update = await db.from('orders').update({
+    account_sent_by: user.id,
+    account_sent_by_name: name,
+    execution_by: user.id,
+    execution_by_name: name,
+    execution_by_role: profile?.role || 'employee',
+    account_sent_at: now
+  }).eq('id', id);
+
+  if (update.error) {
+    return say('تم تسجيل التسليم، لكن تعذر تسجيل اسم المنفذ: ' + update.error.message, 'bad');
+  }
+
+  say('تم تسجيل التسليم باسم ' + name, 'ok');
+  await staffView();
+}
 async function approve(id){const r=await db.rpc('approve_store_payment',{p_order_id:id});if(r.error)return say(r.error.message,'bad');say('تم اعتماد الدفع','ok');await staffView();}
 async function reject(id){const reason=prompt('سبب الرفض')||'';const r=await db.rpc('reject_store_payment',{p_order_id:id,p_reason:reason});if(r.error)return say(r.error.message,'bad');say('تم رفض الإيصال','ok');await staffView();}
 function productForm(p={}){modal(p.id?'تعديل منتج':'إضافة منتج',`<div class="field"><label>اسم المنتج</label><input id="pn" value="${esc(p.name||'')}"></div><div class="field"><label>الوصف</label><textarea id="pd">${esc(p.description||'')}</textarea></div><div class="field"><label>السعر</label><input id="pp" type="number" min="0" step="0.01" value="${p.price??''}"></div><div class="field"><label>التصنيف</label><input id="pc" value="${esc(p.category||'')}"></div><div class="field"><label>المخزون</label><input id="ps" type="number" min="0" value="${p.stock??0}"></div><label><input id="pu" type="checkbox" ${p.is_unlimited?'checked':''}> مخزون غير محدود</label><div class="field"><label>صورة المنتج</label><input id="pi" type="file" accept="image/*"></div><label><input id="pa" type="checkbox" ${p.is_active===false?'':'checked'}> المنتج ظاهر في المتجر</label><br><label><input id="prv" type="checkbox" ${p.show_reviews===false?'':'checked'}> إظهار تقييمات هذا المنتج للزباين</label><p class="small muted">التسليم للعميل يتم يدويًا عبر البريد بعد اعتماد الدفع.</p><p><button onclick="saveProduct('${p.id||''}')">حفظ المنتج</button></p>`);}
