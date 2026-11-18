@@ -126,7 +126,6 @@ function render(){
  <h3><button class="secondary" style="padding:0;background:none;border:0;text-align:right;color:inherit" onclick="productDetails('${p.id}')">${esc(p.name)}</button></h3><p class="desc">${esc(p.description||'')}</p>
  <div class="bottom"><div class="row"><b class="price">${cash(p.price)}</b><span class="muted small">${p.is_unlimited?'متوفر':Number(p.stock)>0?'المخزون '+Number(p.stock):'نفد المخزون'}</span></div>
  <button class="secondary" style="width:100%;margin-top:8px" onclick="productDetails('${p.id}')">عرض التفاصيل والتقييمات</button><button style="width:100%;margin-top:8px" onclick="add('${p.id}')" ${(!p.is_unlimited&&Number(p.stock)<=0)?'disabled':''}>أضف للسلة</button>
- ${whatsappUrl('مرحبًا، أريد الاستفسار عن المنتج: '+p.name)?`<a href="${esc(whatsappUrl('مرحبًا، أريد الاستفسار عن المنتج: '+p.name))}" target="_blank" rel="noopener noreferrer" style="display:block;text-align:center;text-decoration:none;background:#176b4c;color:#fff;border-radius:12px;padding:10px 15px;margin-top:8px;font-weight:700">استفسر عن المنتج عبر واتساب</a>`:''}
  ${p.show_reviews!==false&&p.reviews?.length?`<div class="small muted" style="margin-top:8px">⭐ ${(p.reviews.reduce((a,r)=>a+Number(r.rating||0),0)/p.reviews.length).toFixed(1)} — ${p.reviews.length} تقييم</div>`:''}
  </div></article>`).join(''):'<div class="empty">لا توجد منتجات مطابقة.</div>';
 }
