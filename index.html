@@ -96,6 +96,12 @@ function isStaff(){return ['admin','employee'].includes(profile?.role);}
 function isAdmin(){return profile?.role==='admin';}
 function paymentLabel(o){const s=o.payment_status||o.status;return ({pending:'بانتظار الدفع',under_review:'الإيصال قيد المراجعة',paid:'تم قبول الدفع',rejected:'تم رفض الإيصال'})[s]||s||'غير محدد';}
 function orderStatusLabel(o){return o.account_sent_at?'تم التسليم عبر البريد':o.payment_status==='paid'?'تم اعتماد الدفع — بانتظار التسليم':paymentLabel(o);}
+ function executionLabel(o){
+ if(!o.account_sent_at)return '';
+ const role=o.execution_by_role==='manager'?'المدير':o.execution_by_role==='employee'?'الموظف':'أحد أعضاء الإدارة';
+ const name=o.execution_by_name||'الاسم غير مسجل';
+ return `تم الإرسال بواسطة ${role} — ${name}`;
+}
 function updateStaffIdentity(){const box=$('staffIdentity');if(!box)return;const show=!!user&&isStaff()&&profile?.is_active!==false;box.classList.toggle('hidden',!show);box.classList.toggle('admin',profile?.role==='admin');if(!show)return;const name=profile?.full_name||user?.email||'مستخدم';const rank=profile?.role==='admin'?'المدير':(profile?.job_title||'موظف');$('staffName').textContent=name;$('staffRank').textContent=rank;$('staffAvatar').textContent=(name.trim()[0]||'م').toUpperCase();}
 function nav(){$('loginBtn').classList.toggle('hidden',!!user);$('logoutBtn').classList.toggle('hidden',!user);$('ordersBtn').classList.toggle('hidden',!user);$('staffBtn').classList.toggle('hidden',!isStaff());updateStaffIdentity();}
 async function init(){
@@ -181,8 +187,28 @@ async function deleteReview(id){if(!isAdmin())return say('هذه الخاصية 
 function employeeForm(id){if(!isAdmin())return say('هذه الخاصية للمدير فقط','bad');const p=adminCache.profiles.find(x=>x.id===id);if(!p)return say('لم يتم العثور على الموظف','bad');const perms=p.permissions||[];modal('تعديل بيانات الموظف',`<div class="field"><label>اسم الموظف</label><input id="empName" value="${esc(p.full_name||'')}"></div><div class="field"><label>المسمى الوظيفي</label><input id="empTitle" value="${esc(p.job_title||'')}" placeholder="مثال: مسؤول الطلبات"></div><div class="field"><label>الصلاحيات</label><label><input type="checkbox" id="empProducts" ${perms.includes('products')?'checked':''}> إدارة المنتجات</label><br><label><input type="checkbox" id="empOrders" ${perms.includes('orders')?'checked':''}> إدارة الطلبات</label></div><label><input type="checkbox" id="empActive" ${p.is_active===false?'':'checked'}> الحساب نشط</label><p><button onclick="saveEmployee('${p.id}')">حفظ التعديلات</button></p>`);}
 async function saveEmployee(id){if(!isAdmin())return say('هذه الخاصية للمدير فقط','bad');const name=$('empName').value.trim(),job=$('empTitle').value.trim(),permissions=[];if($('empProducts').checked)permissions.push('products');if($('empOrders').checked)permissions.push('orders');if(!name)return say('اكتب اسم الموظف','bad');const r=await db.from('profiles').update({full_name:name,job_title:job,permissions,is_active:$('empActive').checked}).eq('id',id).eq('role','employee').select('id');if(r.error)return say('تعذر حفظ بيانات الموظف: '+r.error.message,'bad');if(!r.data?.length)return say('لم يتم التعديل؛ تحقق من صلاحيات RLS','bad');closeModal();say('تم تحديث بيانات الموظف','ok');await staffView();}
 async function removeEmployee(id){if(!isAdmin())return say('هذه الخاصية للمدير فقط','bad');if(!confirm('هل أنت متأكد من حذف حساب الموظف من جدول profiles؟'))return;const r=await db.from('profiles').delete().eq('id',id).eq('role','employee').select('id');if(r.error)return say('تعذر حذف الموظف: '+r.error.message,'bad');if(!r.data?.length)return say('لم يتم الحذف؛ تحقق من صلاحيات RLS','bad');say('تم حذف سجل الموظف من profiles. لم يتم حذف حساب تسجيل الدخول نفسه.','ok');await staffView();}
-function ordersTable(list){return `<div class="scroll"><table><tr><th>الطلب</th><th>العميل</th><th>المبلغ</th><th>الحالة</th><th>الإجراءات</th></tr>${list.map(o=>`<tr><td><b>${esc(o.product_name)}</b><div class="small muted">${esc(o.id)}</div></td><td>${esc(o.customer_name)}<div class="small">${esc(o.customer_email||'البريد غير مسجل')}</div><div class="small">${esc(o.customer_phone||'الجوال غير مسجل')}</div></td><td>${cash(o.total)}<div class="small muted">قبل الخصم ${cash(o.subtotal??o.total)}</div></td><td>${esc(paymentLabel(o))}<div class="small muted">${o.account_sent_at?'تم التسليم':o.payment_status==='paid'?'بانتظار التسليم':''}</div></td><td><div class="actions"><button class="secondary" onclick="orderDetails('${o.id}')">تفاصيل</button>${o.receipt_path?`<button class="secondary" onclick="showReceipt('${o.id}')">الإيصال</button>`:''}${o.payment_status==='under_review'?`<button class="success" onclick="approve('${o.id}')">قبول</button><button class="danger" onclick="reject('${o.id}')">رفض</button>`:''}${o.payment_status==='paid'&&!o.account_sent_at?`<button onclick="markAccountSent('${o.id}')">تم الإرسال بالبريد</button>`:''}${o.account_sent_at?'<span class="pill">تم التسليم</span>':''}</div></td></tr>`).join('')||'<tr><td colspan="5">لا توجد طلبات.</td></tr>'}</table></div>`;}
-function filterAdminOrders(){const q=($('orderSearch').value||'').toLowerCase();$('ordersTable').innerHTML=ordersTable(adminCache.orders.filter(o=>[o.id,o.product_name,o.customer_name,o.customer_email,o.customer_phone].some(v=>String(v||'').toLowerCase().includes(q))));}
+function ordersTable(list){
+ return `<div class="scroll"><table>
+ <tr><th>الطلب</th><th>العميل</th><th>المبلغ</th><th>الحالة</th><th>الإجراءات</th></tr>
+ ${list.map(o=>`<tr>
+ <td><b>${esc(o.product_name)}</b><div class="small muted">${esc(o.id)}</div></td>
+ <td>${esc(o.customer_name)}<div class="small">${esc(o.customer_email||'البريد غير مسجل')}</div><div class="small">${esc(o.customer_phone||'الجوال غير مسجل')}</div></td>
+ <td>${cash(o.total)}<div class="small muted">قبل الخصم ${cash(o.subtotal??o.total)}</div></td>
+ <td>
+ ${esc(paymentLabel(o))}
+ <div class="small muted">${o.account_sent_at?'تم التسليم':'بانتظار التسليم'}</div>
+ ${o.account_sent_at?`<div class="notice ok small">${esc(executionLabel(o))}</div>`:''}
+ </td>
+ <td><div class="actions">
+ <button class="secondary" onclick="orderDetails('${o.id}')">تفاصيل</button>
+ ${o.receipt_path?`<button class="secondary" onclick="showReceipt('${o.id}')">الإيصال</button>`:''}
+ ${o.payment_status==='under_review'?`<button class="success" onclick="approve('${o.id}')">قبول</button><button class="danger" onclick="reject('${o.id}')">رفض</button>`:''}
+ ${o.payment_status==='paid'&&!o.account_sent_at?`<button onclick="markAccountSent('${o.id}')">تم الإرسال بالبريد</button>`:''}
+ ${o.account_sent_at?'<span class="pill">تم التسليم</span>':''}
+ </div></td>
+ </tr>`).join('')||'<tr><td colspan="5">لا توجد طلبات.</td></tr>'}
+ </table></div>`;
+}
 async function saveSettings(){if(!isAdmin())return say('هذه الخاصية للمدير فقط','bad');if(!settings.id)return say('لا يوجد سجل إعدادات في جدول store_settings. أضف سجلًا واحدًا ثم حدّث الصفحة.','bad');const payload={store_name:$('settingStoreName').value.trim(),whatsapp_number:$('settingWhatsapp').value.trim(),bank_name:$('settingBank').value.trim(),account_name:$('settingAccountName').value.trim(),account_number:$('settingAccountNumber').value.trim(),iban:$('settingIban').value.trim(),welcome_coupon:$('settingWelcomeCoupon').value.trim(),updated_at:new Date().toISOString()};const r=await db.from('store_settings').update(payload).eq('id',settings.id).select().maybeSingle();if(r.error)return say('تعذر حفظ الإعدادات: '+r.error.message,'bad');if(!r.data)return say('لم يتم تحديث السجل. تحقق من صلاحيات RLS لجدول store_settings.','bad');settings=r.data;refreshWhatsapp();say('تم حفظ إعدادات المتجر','ok');renderAdmin();}
 async function toggleProduct(id,active){if(!isStaff())return say('ليس لديك صلاحية','bad');const r=await db.from('products').update({is_active:active,updated_at:new Date().toISOString()}).eq('id',id);if(r.error)return say(r.error.message,'bad');say(active?'تم إظهار المنتج':'تم إخفاء المنتج','ok');await staffView();await getProducts();}
 function couponForm(c={}){modal(c.id?'تعديل كود خصم':'إنشاء كود خصم',`<div class="field"><label>الكود</label><input id="cpCode" value="${esc(c.code||'')}" placeholder="SAVE20"></div><div class="field"><label>نوع الخصم</label><select id="cpType"><option value="percent" ${c.discount_type==='percent'?'selected':''}>نسبة مئوية</option><option value="fixed" ${c.discount_type==='fixed'?'selected':''}>مبلغ ثابت</option></select></div><div class="field"><label>قيمة الخصم</label><input id="cpValue" type="number" min="0.01" step="0.01" value="${c.discount_value??''}"></div><div class="field"><label>تاريخ الانتهاء</label><input id="cpExpiry" type="datetime-local" value="${c.expires_at?new Date(new Date(c.expires_at).getTime()-new Date(c.expires_at).getTimezoneOffset()*60000).toISOString().slice(0,16):''}"></div><div class="field"><label>الحد الأقصى للاستخدام</label><input id="cpLimit" type="number" min="1" value="${c.usage_limit??''}"></div><label><input id="cpActive" type="checkbox" ${c.is_active===false?'':'checked'}> الكود مفعل</label><p><button onclick="saveCoupon('${c.id||''}')">حفظ الكود</button></p>`);}
@@ -191,7 +217,41 @@ async function saveCoupon(id){const code=$('cpCode').value.trim().toUpperCase().
 async function toggleCoupon(id,active){const r=await db.from('coupons').update({is_active:active}).eq('id',id);if(r.error)return say(r.error.message,'bad');say(active?'تم تفعيل الكود':'تم إيقاف الكود','ok');await staffView();}
 async function orderDetails(id){const r=await db.from('orders').select('*').eq('id',id).single();if(r.error)return say(r.error.message,'bad');const o=r.data;modal('تفاصيل الطلب',`<div class="card"><p><b>المنتج:</b> ${esc(o.product_name)}</p><p><b>اسم العميل:</b> ${esc(o.customer_name)}</p><p><b>البريد الإلكتروني:</b> ${esc(o.customer_email||'غير مسجل')}</p><p><b>الجوال:</b> ${esc(o.customer_phone||'غير مسجل')}</p><hr><p>قبل الخصم: ${cash(o.subtotal??o.total)}</p><p>الكود: ${esc(o.coupon_code||'لا يوجد')}</p><p>الخصم: ${cash(o.discount_amount)}</p><p><b>الإجمالي: ${cash(o.total)}</b></p><p>حالة الدفع: ${esc(paymentLabel(o))}</p><p>رقم العملية: ${esc(o.payment_reference||'غير مضاف')}</p><p>حالة التسليم: ${o.account_sent_at?'تم التسليم':'لم يتم تسجيل التسليم'}</p>${o.account_sent_at?`<p>وقت التسليم: ${new Date(o.account_sent_at).toLocaleString('ar-SA')}</p>`:''}<p>تاريخ الطلب: ${o.created_at?new Date(o.created_at).toLocaleString('ar-SA'):''}</p>${o.rejection_reason?`<p>سبب الرفض: ${esc(o.rejection_reason)}</p>`:''}${o.receipt_path?`<button onclick="showReceipt('${o.id}')">فتح إيصال التحويل</button>`:'<p class="muted">لم يرفع العميل إيصالًا.</p>'}${o.payment_status==='paid'&&!o.account_sent_at?`<div class="notice">بعد إرسال المنتج يدويًا إلى بريد العميل، اضغط «تم الإرسال بالبريد» في قائمة الطلبات.</div><button onclick="markAccountSent('${o.id}')">تم الإرسال بالبريد</button>`:''}</div>`);}
 async function showReceipt(id){if(!isStaff())return say('ليس لديك صلاحية','bad');const q=await db.from('orders').select('receipt_path').eq('id',id).single();if(q.error)return say(q.error.message,'bad');if(!q.data.receipt_path)return say('لا يوجد إيصال','bad');const r=await db.storage.from('payment-receipts').createSignedUrl(q.data.receipt_path,120);if(r.error)return say('تعذر فتح الإيصال: '+r.error.message,'bad');window.open(r.data.signedUrl,'_blank','noopener');}
-async function markAccountSent(id){if(!isStaff())return say('ليس لديك صلاحية','bad');if(!confirm('هل أرسلت المنتج أو بيانات الحساب إلى بريد العميل بالفعل؟'))return;const r=await db.rpc('mark_account_sent',{p_order_id:id});if(r.error)return say(r.error.message,'bad');say('تم الارسال عبر البريد رقم الجوال','ok');await staffView();}
+async function markAccountSent(id){
+ if(!isStaff())return say('ليس لديك صلاحية','bad');
+
+ const order=adminCache.orders.find(o=>o.id===id);
+ if(order?.account_sent_at)return say('هذا الطلب تم تسليمه مسبقًا','bad');
+
+ if(!confirm('هل أرسلت المنتج أو بيانات الحساب إلى العميل بالفعل؟'))return;
+
+ const btns=document.querySelectorAll('button[onclick*="markAccountSent"]');
+ btns.forEach(b=>b.disabled=true);
+
+ try{
+  const r=await db.rpc('mark_account_sent',{p_order_id:id});
+  if(r.error)throw r.error;
+
+  const executorRole=profile?.role==='admin'?'manager':'employee';
+  const executorName=profile?.full_name||user?.email||'غير معروف';
+
+  const saved=await db.from('orders').update({
+   execution_status:'completed',
+   execution_by:user.id,
+   execution_by_name:executorName,
+   execution_by_role:executorRole
+  }).eq('id',id).select('id');
+
+  if(saved.error)throw new Error('تم تسجيل التسليم، لكن تعذر حفظ اسم المنفذ: '+saved.error.message);
+  if(!saved.data?.length)throw new Error('تم تسجيل التسليم، لكن لم يُحفظ اسم المنفذ. تحقق من صلاحيات تحديث الطلبات.');
+
+  say('تم تسجيل الإرسال باسم '+executorName,'ok');
+  await staffView();
+ }catch(e){
+  say(e.message||'حدث خطأ أثناء تسجيل الإرسال','bad');
+  btns.forEach(b=>b.disabled=false);
+ }
+}
 async function approve(id){const r=await db.rpc('approve_store_payment',{p_order_id:id});if(r.error)return say(r.error.message,'bad');say('تم اعتماد الدفع','ok');await staffView();}
 async function reject(id){const reason=prompt('سبب الرفض')||'';const r=await db.rpc('reject_store_payment',{p_order_id:id,p_reason:reason});if(r.error)return say(r.error.message,'bad');say('تم رفض الإيصال','ok');await staffView();}
 function productForm(p={}){modal(p.id?'تعديل منتج':'إضافة منتج',`<div class="field"><label>اسم المنتج</label><input id="pn" value="${esc(p.name||'')}"></div><div class="field"><label>الوصف</label><textarea id="pd">${esc(p.description||'')}</textarea></div><div class="field"><label>السعر</label><input id="pp" type="number" min="0" step="0.01" value="${p.price??''}"></div><div class="field"><label>التصنيف</label><input id="pc" value="${esc(p.category||'')}"></div><div class="field"><label>المخزون</label><input id="ps" type="number" min="0" value="${p.stock??0}"></div><label><input id="pu" type="checkbox" ${p.is_unlimited?'checked':''}> مخزون غير محدود</label><div class="field"><label>صورة المنتج</label><input id="pi" type="file" accept="image/*"></div><label><input id="pa" type="checkbox" ${p.is_active===false?'':'checked'}> المنتج ظاهر في المتجر</label><br><label><input id="prv" type="checkbox" ${p.show_reviews===false?'':'checked'}> إظهار تقييمات هذا المنتج للزباين</label><p class="small muted">التسليم للعميل يتم يدويًا عبر البريد بعد اعتماد الدفع.</p><p><button onclick="saveProduct('${p.id||''}')">حفظ المنتج</button></p>`);}
