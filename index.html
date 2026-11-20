@@ -242,7 +242,7 @@ async function markAccountSent(id){
   if(r.error)throw r.error;
 
   const executorRole=profile?.role==='admin'?'manager':'employee';
-  const executorName=profile?.full_name||user?.email||'غير معروف';
+ const executorName = 'عمر العنزي';
 
   const saved=await db.from('orders').update({
    execution_status:'completed',
