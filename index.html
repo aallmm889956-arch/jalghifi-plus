@@ -241,8 +241,8 @@ async function markAccountSent(id){
   const r=await db.rpc('mark_account_sent',{p_order_id:id});
   if(r.error)throw r.error;
 
-  const executorRole=profile?.role==='admin'?'manager':'employee';
- const executorName = 'عمر العنزي';
+  const executorRole = profile?.role === 'admin' ? 'admin' : 'employee';
+  const executorName = profile?.full_name || user?.email || 'غير معروف';
 
   const saved=await db.from('orders').update({
    execution_status:'completed',
