@@ -96,11 +96,20 @@ function isStaff(){return ['admin','employee'].includes(profile?.role);}
 function isAdmin(){return profile?.role==='admin';}
 function paymentLabel(o){const s=o.payment_status||o.status;return ({pending:'بانتظار الدفع',under_review:'الإيصال قيد المراجعة',paid:'تم قبول الدفع',rejected:'تم رفض الإيصال'})[s]||s||'غير محدد';}
 function orderStatusLabel(o){return o.account_sent_at?'تم التسليم عبر البريد':o.payment_status==='paid'?'تم اعتماد الدفع — بانتظار التسليم':paymentLabel(o);}
- function executionLabel(o){
- if(!o.account_sent_at)return '';
- const role=o.execution_by_role==='manager'?'المدير':o.execution_by_role==='employee'?'الموظف':'أحد أعضاء الإدارة';
- const name=o.execution_by_name||'الاسم غير مسجل';
- return `تم الإرسال بواسطة ${role} — ${name}`;
+function executionLabel(o){
+  if(!o.account_sent_at) return '';
+
+  const role =
+    o.execution_by_role === 'admin' ? 'المدير' :
+    o.execution_by_role === 'employee' ? 'الموظف' :
+    'أحد أعضاء الإدارة';
+
+  const name =
+    o.execution_by_name ||
+    o.account_sent_by_name ||
+    'الاسم غير مسجل';
+
+  return `تم الإرسال بواسطة ${role} — ${name}`;
 }
 function updateStaffIdentity(){const box=$('staffIdentity');if(!box)return;const show=!!user&&isStaff()&&profile?.is_active!==false;box.classList.toggle('hidden',!show);box.classList.toggle('admin',profile?.role==='admin');if(!show)return;const name=profile?.full_name||user?.email||'مستخدم';const rank=profile?.role==='admin'?'المدير':(profile?.job_title||'موظف');$('staffName').textContent=name;$('staffRank').textContent=rank;$('staffAvatar').textContent=(name.trim()[0]||'م').toUpperCase();}
 function nav(){$('loginBtn').classList.toggle('hidden',!!user);$('logoutBtn').classList.toggle('hidden',!user);$('ordersBtn').classList.toggle('hidden',!user);$('staffBtn').classList.toggle('hidden',!isStaff());updateStaffIdentity();}
